@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A192F">
+<title>眠眠宝 Sleepal · AI 睡眠伴侣</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-primary: #0A192F;
+  --bg-secondary: #0F1F3D;
+  --bg-tertiary: #142B52;
+  --bg-card: rgba(20, 43, 82, 0.55);
+  --bg-card-hover: rgba(20, 43, 82, 0.8);
+  --border-subtle: rgba(255, 217, 124, 0.12);
+  --border-strong: rgba(255, 217, 124, 0.28);
+  --text-primary: #FFF8F0;
+  --text-secondary: rgba(255, 248, 240, 0.72);
+  --text-tertiary: rgba(255, 248, 240, 0.5);
+  --text-quaternary: rgba(255, 248, 240, 0.3);
+  --accent: #FFD97C;
+  --accent-bright: #FFE59E;
+  --accent-warm: #FFC85C;
+  --accent-glow: rgba(255, 217, 124, 0.2);
+  --accent-soft: rgba(255, 217, 124, 0.08);
+  --peach: #FFE8D6;
+  --dust-pink: #E8B4C8;
+  --dust-lilac: #C4B4E0;
+  --dust-mint: #B4E0D4;
+  --font-cn: "PingFang SC", "Source Han Sans SC", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-en: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Fraunces", "Songti SC", "STSong", Georgia, serif;
+  --font-mono: "SF Mono", "JetBrains Mono", "Menlo", monospace;
+  --max-width: 1700px;
+  --gutter: clamp(24px, 4vw, 80px);
+  --section-py: clamp(80px, 10vw, 160px);
+  --radius-sm: 12px;
+  --radius: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 40px;
+  --radius-pill: 100px;
+  --shadow-glow: 0 0 60px rgba(255, 217, 124, 0.2);
+  --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 0.4s;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
+img, video { max-width: 100%; height: auto; display: block; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; padding: 0; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-cn);
+  font-weight: 300;
+  line-height: 1.75;
+  min-height: 100vh;
+  overflow-x: hidden;
+  letter-spacing: 0.01em;
+  cursor: none;
+}
+
+/* ═══════════════════════════════════════════════
+   Custom Cursor · warm gold spotlight
+═══════════════════════════════════════════════ */
+.cursor-dot, .cursor-glow {
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+  transform: translate3d(-100px, -100px, 0);
+  border-radius: 50%;
+}
+.cursor-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  transition: width 0.3s var(--ease), height 0.3s var(--ease), opacity 0.3s ease;
+  margin-left: -4px; margin-top: -4px;
+}
+.cursor-glow {
+  width: 40px; height: 40px;
+  background: radial-gradient(circle, rgba(255, 217, 124, 0.35) 0%, transparent 70%);
+  filter: blur(8px);
+  transition: width 0.5s var(--ease), height 0.5s var(--ease), opacity 0.5s ease;
+  margin-left: -20px; margin-top: -20px;
+}
+.cursor-dot.hover { width: 40px; height: 40px; margin-left: -20px; margin-top: -20px; background: transparent; border: 1.5px solid var(--accent); }
+.cursor-glow.hover { width: 100px; height: 100px; margin-left: -50px; margin-top: -50px; opacity: 0.7; }
+@media (hover: none) {
+  body { cursor: auto; }
+  .cursor-dot, .cursor-glow { display: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   Ambient background blobs
+═══════════════════════════════════════════════ */
+.blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  animation: blob-drift 20s ease-in-out infinite;
+  will-change: transform;
+}
+.blob-1 { width: 500px; height: 500px; background: rgba(255, 217, 124, 0.25); top: -100px; right: -100px; }
+.blob-2 { width: 600px; height: 600px; background: rgba(196, 180, 224, 0.15); bottom: -200px; left: -150px; animation-delay: -10s; }
+.blob-3 { width: 400px; height: 400px; background: rgba(180, 224, 212, 0.1); top: 60%; left: 40%; animation-delay: -5s; }
+@keyframes blob-drift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(60px,-40px) scale(1.1); }
+  66% { transform: translate(-40px,50px) scale(0.95); }
+}
+
+/* Stars */
+.stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.stars::before {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 20%, rgba(255,248,240,0.7), transparent),
+    radial-gradient(1.2px 1.2px at 25% 45%, rgba(232,204,106,0.6), transparent),
+    radial-gradient(1px 1px at 42% 70%, rgba(255,248,240,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 58% 15%, rgba(232,204,106,0.7), transparent),
+    radial-gradient(1px 1px at 72% 40%, rgba(255,248,240,0.6), transparent),
+    radial-gradient(0.8px 0.8px at 85% 65%, rgba(255,248,240,0.5), transparent),
+    radial-gradient(1.3px 1.3px at 92% 25%, rgba(232,204,106,0.6), transparent),
+    radial-gradient(1px 1px at 15% 85%, rgba(255,248,240,0.4), transparent);
+  animation: twinkle 5s ease-in-out infinite;
+}
+@keyframes twinkle { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* ═══════════════════════════════════════════════
+   Layout
+═══════════════════════════════════════════════ */
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--gutter); width: 100%; position: relative; z-index: 1; }
+.section { padding: var(--section-py) 0; position: relative; }
+.section-header { max-width: 800px; margin-bottom: 80px; }
+.section-eyebrow { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.32em; color: var(--accent); text-transform: uppercase; margin-bottom: 24px; }
+.section-eyebrow::before { content: ""; width: 32px; height: 1px; background: var(--accent); }
+.section-title { font-family: var(--font-cn); font-size: clamp(36px, 4vw, 56px); font-weight: 300; color: var(--text-primary); line-height: 1.25; margin-bottom: 20px; letter-spacing: 0.01em; }
+.section-title em { font-style: normal; color: var(--accent); font-weight: 400; }
+.section-lead { font-family: var(--font-serif); font-style: italic; font-size: 18px; color: var(--text-secondary); max-width: 640px; line-height: 1.85; font-weight: 300; }
+
+/* ═══════════════════════════════════════════════
+   Scroll Reveal
+═══════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s var(--ease), transform 1s var(--ease);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+.reveal-blur { filter: blur(10px); opacity: 0; transition: all 1.4s var(--ease); }
+.reveal-blur.visible { filter: blur(0); opacity: 1; }
+
+/* Word stagger reveal (used for hero title) */
+.split-word { display: inline-block; opacity: 0; transform: translateY(30px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+.split-word.on { opacity: 1; transform: translateY(0); }
+
+/* ═══════════════════════════════════════════════
+   Nav
+═══════════════════════════════════════════════ */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 0; transition: all var(--duration) var(--ease); background: transparent; border-bottom: 1px solid transparent; }
+.nav.scrolled { padding: 14px 0; background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); border-bottom-color: var(--border-subtle); }
+.nav-inner { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+.nav-brand { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+.nav-brand-cn { font-family: var(--font-cn); font-size: 20px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.06em; }
+.nav-brand-en { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--accent); letter-spacing: 0.03em; }
+.nav-items { display: flex; gap: 44px; align-items: center; }
+.nav-items a { font-family: var(--font-cn); font-size: 14px; color: var(--text-secondary); padding: 4px 0; position: relative; transition: color 0.3s ease; letter-spacing: 0.06em; }
+.nav-items a::after { content: ""; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--accent); transition: width 0.4s var(--ease); }
+.nav-items a:hover { color: var(--text-primary); }
+.nav-items a:hover::after { width: 100%; }
+.nav-cta { font-family: var(--font-cn); font-size: 13px; color: var(--text-primary); padding: 10px 22px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); transition: all 0.4s var(--ease); letter-spacing: 0.05em; white-space: nowrap; position: relative; overflow: hidden; }
+.nav-cta:hover { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+
+/* ═══════════════════════════════════════════════
+   Hero
+═══════════════════════════════════════════════ */
+.hero { position: relative; height: 100vh; min-height: 640px; overflow: hidden; display: flex; align-items: center; }
+.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.hero-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(10, 25, 47, 0.4) 0%, rgba(10, 25, 47, 0.5) 50%, rgba(10, 25, 47, 0.95) 100%), radial-gradient(ellipse at 30% 50%, rgba(10, 25, 47, 0.3) 0%, transparent 60%); }
+.hero-content { position: relative; z-index: 2; max-width: var(--max-width); width: 100%; margin: 0 auto; padding: 0 var(--gutter); }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase; margin-bottom: 40px; padding: 8px 20px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); background: rgba(10, 25, 47, 0.4); backdrop-filter: blur(10px); }
+.hero-eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+.hero-title { font-family: var(--font-cn); font-size: clamp(48px, 6.5vw, 96px); font-weight: 300; color: var(--text-primary); line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 32px; max-width: 1100px; text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5); }
+.hero-subtitle { font-family: var(--font-serif); font-style: italic; font-size: clamp(18px, 1.8vw, 24px); color: var(--text-secondary); max-width: 640px; line-height: 1.7; margin-bottom: 56px; font-weight: 300; }
+.hero-cta-row { display: flex; gap: 32px; align-items: center; flex-wrap: wrap; }
+.hero-scroll-hint { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 3; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.3em; text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+.hero-scroll-hint::after { content: ""; width: 32px; height: 1px; background: var(--accent); opacity: 0.6; animation: scroll-line 2.5s ease-in-out infinite; }
+@keyframes scroll-line { 0%,100% { transform: scaleX(0.3); opacity: 0.3; } 50% { transform: scaleX(1); opacity: 0.9; } }
+
+/* ═══════════════════════════════════════════════
+   Buttons — with ripple + magnetic
+═══════════════════════════════════════════════ */
+.btn { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-cn); font-size: 15px; font-weight: 500; padding: 16px 32px; border-radius: var(--radius-pill); cursor: pointer; transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), background var(--duration) var(--ease); letter-spacing: 0.05em; white-space: nowrap; position: relative; overflow: hidden; will-change: transform; }
+.btn-primary { color: var(--bg-primary); background: var(--accent); box-shadow: 0 8px 32px rgba(255, 217, 124, 0.3); }
+.btn-primary:hover { box-shadow: 0 14px 40px rgba(255, 217, 124, 0.5); background: var(--accent-bright); }
+.btn-primary .arrow { transition: transform var(--duration) var(--ease); }
+.btn-primary:hover .arrow { transform: translateX(6px); }
+.btn-ghost { color: var(--text-primary); background: transparent; border: 1px solid var(--border-strong); }
+.btn-ghost:hover { background: rgba(255, 217, 124, 0.1); border-color: var(--accent); }
+.ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.4); transform: scale(0); animation: ripple 0.6s var(--ease); pointer-events: none; }
+@keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+/* ═══════════════════════════════════════════════
+   Marquee
+═══════════════════════════════════════════════ */
+.marquee { padding: 40px 0; overflow: hidden; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); background: linear-gradient(90deg, transparent 0%, rgba(255,217,124,0.03) 50%, transparent 100%); }
+.marquee-track { display: flex; gap: 60px; white-space: nowrap; animation: marquee 40s linear infinite; will-change: transform; }
+.marquee-item { font-family: var(--font-serif); font-style: italic; font-size: clamp(24px, 3vw, 40px); color: var(--text-tertiary); font-weight: 300; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 60px; }
+.marquee-item::after { content: "✦"; color: var(--accent); font-style: normal; font-size: 0.6em; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ═══════════════════════════════════════════════
+   Manifesto
+═══════════════════════════════════════════════ */
+.manifesto { min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px var(--gutter); text-align: center; position: relative; }
+.manifesto-mark { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase; margin-bottom: 48px; opacity: 0.7; }
+.manifesto-line { font-family: var(--font-cn); font-size: clamp(32px, 5vw, 64px); font-weight: 300; color: var(--text-primary); line-height: 1.35; letter-spacing: 0.02em; max-width: 900px; margin-bottom: 32px; }
+.manifesto-line em { font-style: normal; color: var(--accent); font-weight: 400; }
+.manifesto-sub { font-family: var(--font-serif); font-size: clamp(18px, 2vw, 22px); font-style: italic; color: rgba(245,237,227,0.65); font-weight: 300; letter-spacing: 0.02em; max-width: 640px; }
+
+/* ═══════════════════════════════════════════════
+   Character — 眠眠 showcase
+═══════════════════════════════════════════════ */
+.char-showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center; }
+.char-frame { position: relative; aspect-ratio: 1; max-width: 620px; margin: 0 auto; will-change: transform; transition: transform 0.6s var(--ease); }
+.char-frame-inner { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(255, 217, 124, 0.15), transparent 60%), linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card), var(--shadow-glow); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.char-frame-inner::before { content: ""; position: absolute; inset: -50%; background: conic-gradient(from 0deg, transparent 0deg, rgba(255,217,124,0.15) 90deg, transparent 180deg); animation: rotate 12s linear infinite; }
+@keyframes rotate { to { transform: rotate(360deg); } }
+.char-frame-inner img { position: relative; z-index: 1; width: 90%; height: 90%; object-fit: contain; filter: drop-shadow(0 8px 40px rgba(0,0,0,0.4)); animation: gentle-float 5s ease-in-out infinite; }
+@keyframes gentle-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.char-placeholder { position: relative; z-index: 1; text-align: center; padding: 60px; }
+.char-placeholder-svg { width: 60%; margin: 0 auto 24px; opacity: 0.7; }
+.char-placeholder-text { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.25em; text-transform: uppercase; line-height: 2; }
+
+/* Floating notes around character */
+.char-notes { position: absolute; inset: 0; pointer-events: none; }
+.char-notes .note-tag { position: absolute; font-family: var(--font-serif); font-size: 32px; font-style: italic; color: var(--accent); opacity: 0.6; animation: note-drift 6s ease-in-out infinite; }
+.char-notes .n1 { top: 8%; left: 5%; animation-delay: 0s; }
+.char-notes .n2 { top: 22%; right: 8%; animation-delay: 1.5s; font-size: 24px; }
+.char-notes .n3 { bottom: 15%; left: 12%; animation-delay: 3s; font-size: 28px; }
+.char-notes .n4 { bottom: 25%; right: 6%; animation-delay: 4.5s; font-size: 20px; }
+@keyframes note-drift {
+  0%,100% { transform: translateY(0) rotate(-3deg); opacity: 0.5; }
+  50% { transform: translateY(-16px) rotate(3deg); opacity: 0.9; }
+}
+
+.char-content { max-width: 540px; }
+.char-role { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.32em; text-transform: uppercase; margin-bottom: 20px; }
+.char-name { font-family: var(--font-cn); font-size: clamp(60px, 6vw, 96px); font-weight: 400; color: var(--text-primary); line-height: 1; margin-bottom: 28px; letter-spacing: 0.03em; }
+.char-tagline { font-family: var(--font-serif); font-style: italic; font-size: clamp(22px, 2.2vw, 28px); color: var(--accent-bright); margin-bottom: 36px; line-height: 1.5; font-weight: 400; }
+.char-desc { font-family: var(--font-cn); font-size: 16px; color: var(--text-secondary); line-height: 1.95; margin-bottom: 40px; }
+.char-personality { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px; }
+.personality-item { padding: 20px; border-left: 1px solid var(--border-strong); transition: all 0.4s var(--ease); }
+.personality-item:hover { border-left-color: var(--accent); background: var(--accent-soft); }
+.personality-label { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 8px; }
+.personality-value { font-family: var(--font-cn); font-size: 15px; color: var(--text-primary); line-height: 1.6; }
+.char-features { display: flex; flex-wrap: wrap; gap: 10px; }
+.char-feature { font-family: var(--font-cn); font-size: 12px; color: var(--accent); padding: 8px 16px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); background: var(--accent-soft); letter-spacing: 0.08em; }
+
+/* ═══════════════════════════════════════════════
+   Three Moments
+═══════════════════════════════════════════════ */
+.moments { display: flex; flex-direction: column; gap: 0; }
+.moment { display: grid; grid-template-columns: 240px 1fr; gap: 80px; padding: 80px 0; border-top: 1px solid var(--border-subtle); align-items: start; }
+.moment:last-child { border-bottom: 1px solid var(--border-subtle); }
+.moment-time-block { position: relative; }
+.moment-time { font-family: var(--font-mono); font-size: clamp(56px, 8vw, 108px); font-weight: 200; color: var(--accent); letter-spacing: -0.03em; line-height: 1; margin-bottom: 12px; }
+.moment-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.32em; text-transform: uppercase; }
+.moment-content { padding-top: 20px; }
+.moment-head { font-family: var(--font-cn); font-size: clamp(22px, 2.6vw, 30px); font-weight: 400; color: var(--text-primary); line-height: 1.4; margin-bottom: 20px; }
+.moment-body { font-family: var(--font-cn); font-size: 16px; color: var(--text-secondary); line-height: 1.95; margin-bottom: 24px; max-width: 620px; }
+.moment-tag { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.3em; text-transform: uppercase; }
+.moment-tag::before { content: ""; width: 24px; height: 1px; background: var(--accent); }
+
+/* ═══════════════════════════════════════════════
+   Stats
+═══════════════════════════════════════════════ */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+.stat { text-align: center; padding: 40px 20px; border-right: 1px solid var(--border-subtle); }
+.stat:last-child { border-right: none; }
+.stat-num { font-family: var(--font-serif); font-size: clamp(48px, 6vw, 80px); font-weight: 400; color: var(--accent); line-height: 1; margin-bottom: 12px; letter-spacing: -0.02em; }
+.stat-unit { font-family: var(--font-serif); font-size: 24px; color: var(--accent); font-style: italic; margin-left: 4px; }
+.stat-label { font-family: var(--font-cn); font-size: 14px; color: var(--text-secondary); letter-spacing: 0.08em; }
+.stat-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 8px; }
+
+/* ═══════════════════════════════════════════════
+   Interactive Demo
+═══════════════════════════════════════════════ */
+.demo-stage { padding: 80px clamp(32px, 5vw, 80px); background: radial-gradient(ellipse at top right, rgba(255, 217, 124, 0.08), transparent 60%), linear-gradient(135deg, rgba(15, 33, 61, 0.6) 0%, rgba(10, 25, 47, 0.8) 100%); border: 1px solid var(--border-strong); border-radius: var(--radius-xl); backdrop-filter: blur(20px); position: relative; overflow: hidden; }
+.demo-stage::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.demo-prompt { font-family: var(--font-serif); font-size: clamp(24px, 3vw, 36px); color: var(--text-primary); margin-bottom: 44px; font-style: italic; font-weight: 400; line-height: 1.4; }
+.demo-picker { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 60px; }
+.demo-chip { font-family: var(--font-cn); font-size: 15px; color: var(--text-secondary); background: transparent; border: 1px solid rgba(255, 248, 240, 0.2); padding: 14px 26px; border-radius: var(--radius-pill); transition: all var(--duration) var(--ease); letter-spacing: 0.04em; position: relative; overflow: visible; }
+.demo-chip:hover { border-color: var(--accent); color: var(--text-primary); transform: translateY(-2px); }
+.demo-chip.active { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); font-weight: 500; box-shadow: 0 4px 20px var(--accent-glow); }
+.demo-canvas { min-height: 200px; padding: 48px 0; display: flex; align-items: center; justify-content: center; border-top: 1px solid var(--border-subtle); }
+.demo-empty { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--text-tertiary); letter-spacing: 0.03em; }
+.demo-loading { display: none; flex-direction: column; align-items: center; gap: 28px; }
+.demo-loading.on { display: flex; }
+.dots { display: flex; gap: 12px; }
+.dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: dot-jump 1.4s ease-in-out infinite; }
+.dots span:nth-child(2) { animation-delay: 0.15s; } .dots span:nth-child(3) { animation-delay: 0.3s; } .dots span:nth-child(4) { animation-delay: 0.45s; } .dots span:nth-child(5) { animation-delay: 0.6s; }
+@keyframes dot-jump { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-16px); opacity: 1; } }
+.demo-loading-text { font-family: var(--font-serif); font-size: 16px; font-style: italic; color: var(--text-secondary); letter-spacing: 0.03em; }
+.demo-track { display: none; align-items: center; gap: 40px; width: 100%; flex-wrap: wrap; }
+.demo-track.on { display: flex; }
+.track-play { width: 68px; height: 68px; border-radius: 50%; background: var(--accent); color: var(--bg-primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 30px var(--accent-glow); transition: transform var(--duration) var(--ease); flex-shrink: 0; }
+.track-play:hover { transform: scale(1.08); }
+.track-play svg { width: 24px; height: 24px; margin-left: 3px; }
+.track-info { flex: 1; min-width: 220px; }
+.track-title { font-family: var(--font-serif); font-size: clamp(24px, 2.6vw, 32px); color: var(--text-primary); margin-bottom: 8px; font-weight: 400; font-style: italic; letter-spacing: 0.01em; }
+.track-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.15em; text-transform: uppercase; }
+.waveform { flex: 1; min-width: 200px; height: 44px; display: flex; align-items: center; gap: 3px; }
+.waveform span { flex: 1; background: linear-gradient(180deg, var(--accent-bright), var(--accent)); border-radius: 2px; animation: wave 1.4s ease-in-out infinite; }
+@keyframes wave { 0%,100% { height: 20%; opacity: 0.5; } 50% { height: 100%; opacity: 1; } }
+
+/* Sparkle particles */
+.sparkle { position: fixed; pointer-events: none; z-index: 9998; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-bright); box-shadow: 0 0 8px var(--accent); animation: sparkle 0.8s var(--ease) forwards; }
+@keyframes sparkle {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   Works
+═══════════════════════════════════════════════ */
+.works-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.work-card { border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-subtle); transition: transform var(--duration) var(--ease), background var(--duration) var(--ease), border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease); cursor: pointer; }
+.work-card:hover { transform: translateY(-6px); background: var(--bg-card-hover); border-color: var(--border-strong); box-shadow: var(--shadow-card-hover); }
+.work-thumb { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); display: flex; align-items: center; justify-content: center; }
+.work-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease); }
+.work-card:hover .work-thumb img { transform: scale(1.06); }
+.work-type { position: absolute; top: 16px; left: 16px; padding: 6px 12px; border-radius: var(--radius-pill); background: rgba(10, 25, 47, 0.75); backdrop-filter: blur(12px); font-family: var(--font-cn); font-size: 11px; color: var(--accent); letter-spacing: 0.15em; border: 1px solid var(--border-strong); }
+.work-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 217, 124, 0.9); color: var(--bg-primary); display: flex; align-items: center; justify-content: center; transition: all var(--duration) var(--ease); opacity: 0; }
+.work-card:hover .work-play { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+.work-play svg { width: 22px; height: 22px; margin-left: 3px; }
+.work-info { padding: 24px 28px 28px; }
+.work-title { font-family: var(--font-cn); font-size: 18px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; letter-spacing: 0.03em; }
+.work-desc { font-family: var(--font-cn); font-size: 13px; color: var(--text-tertiary); letter-spacing: 0.05em; }
+
+/* ═══════════════════════════════════════════════
+   Voices
+═══════════════════════════════════════════════ */
+.voices-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 60px; }
+.voice-card { padding: 48px 44px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: all var(--duration) var(--ease); position: relative; }
+.voice-card:hover { border-color: var(--border-strong); transform: translateY(-4px); background: var(--bg-card-hover); }
+.voice-card::before { content: "\201C"; position: absolute; top: 24px; left: 32px; font-family: var(--font-serif); font-size: 60px; color: var(--accent); opacity: 0.4; line-height: 1; }
+.voice-quote { font-family: var(--font-serif); font-size: 18px; font-style: italic; color: var(--text-primary); line-height: 1.85; margin: 32px 0 32px; padding-left: 40px; font-weight: 400; }
+.voice-attr { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.24em; padding-left: 40px; }
+.voice-attr span { color: var(--text-tertiary); margin-left: 12px; }
+
+/* ═══════════════════════════════════════════════
+   Contact
+═══════════════════════════════════════════════ */
+.contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 100px; }
+.contact-card { padding: 48px 40px; border-radius: var(--radius-lg); background: var(--bg-card); border: 1px solid var(--border-subtle); text-align: center; transition: all var(--duration) var(--ease); }
+.contact-card:hover { background: var(--bg-card-hover); border-color: var(--border-strong); transform: translateY(-4px); }
+.contact-icon { width: 64px; height: 64px; margin: 0 auto 24px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-warm)); display: flex; align-items: center; justify-content: center; color: var(--bg-primary); position: relative; }
+.contact-icon::before { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 1px solid var(--accent); opacity: 0; animation: pulse-ring 2s ease-out infinite; }
+@keyframes pulse-ring { 0% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 0; transform: scale(1.4); } }
+.contact-icon svg { width: 28px; height: 28px; fill: currentColor; }
+.contact-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.32em; text-transform: uppercase; margin-bottom: 16px; }
+.contact-value { display: block; font-family: var(--font-cn); font-size: 20px; font-weight: 500; color: var(--text-primary); margin-bottom: 12px; transition: color 0.3s ease; }
+.contact-value:hover { color: var(--accent); }
+.contact-note { font-family: var(--font-cn); font-size: 13px; color: var(--text-tertiary); letter-spacing: 0.05em; }
+.contact-qr { width: 120px; height: 120px; margin: 0 auto 12px; border-radius: var(--radius-sm); background: var(--bg-tertiary); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; }
+.qr-placeholder { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.2em; text-align: center; line-height: 1.6; }
+
+.footer { padding: 60px 0 0; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 20px; }
+.footer-brand { font-family: var(--font-cn); font-size: 16px; color: var(--text-primary); letter-spacing: 0.06em; }
+.footer-brand-en { font-family: var(--font-serif); font-style: italic; color: var(--accent); margin-left: 6px; }
+.footer-slogan { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--text-tertiary); flex: 1; text-align: center; }
+.footer-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-quaternary); letter-spacing: 0.15em; text-transform: uppercase; }
+
+/* ═══════════════════════════════════════════════
+   Mobile
+═══════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .char-showcase { grid-template-columns: 1fr; gap: 60px; }
+  .works-grid { grid-template-columns: repeat(2, 1fr); }
+  .contact-grid { grid-template-columns: 1fr; gap: 16px; }
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  .voices-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  .cursor-dot, .cursor-glow { display: none; }
+  .nav-items { display: none; }
+  .nav-cta { padding: 8px 16px; font-size: 12px; }
+  .hero { min-height: 560px; }
+  .hero-title { font-size: clamp(36px, 8vw, 52px); }
+  .hero-eyebrow { font-size: 10px; padding: 6px 14px; margin-bottom: 28px; }
+  .hero-subtitle { font-size: 16px; margin-bottom: 40px; }
+  .hero-cta-row { gap: 16px; }
+  .btn { padding: 14px 24px; font-size: 14px; }
+  .section { padding: 80px 0; }
+  .section-header { margin-bottom: 48px; }
+  .section-title { font-size: clamp(28px, 6vw, 40px); }
+  .char-name { font-size: clamp(48px, 10vw, 64px); }
+  .char-tagline { font-size: 18px; }
+  .char-personality { grid-template-columns: 1fr; gap: 12px; }
+  .moment { grid-template-columns: 1fr; gap: 24px; padding: 48px 0; }
+  .moment-time { font-size: clamp(48px, 14vw, 72px); }
+  .works-grid { grid-template-columns: 1fr; gap: 20px; }
+  .demo-stage { padding: 48px 24px; }
+  .demo-prompt { font-size: 22px; margin-bottom: 32px; }
+  .demo-chip { padding: 12px 20px; font-size: 14px; }
+  .demo-track { flex-direction: column; align-items: stretch; text-align: center; gap: 24px; }
+  .waveform { min-width: unset; }
+  .contact-card { padding: 36px 24px; }
+  .voice-card { padding: 32px 24px; }
+  .footer { flex-direction: column; align-items: center; text-align: center; }
+  .footer-slogan { flex: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .hero-video { display: none; }
+  .hero { background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor-glow" id="cursor-glow"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
+
+<!-- Ambient background -->
+<div class="blobs" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+<div class="stars" aria-hidden="true"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">
+      <span class="nav-brand-cn">眠眠宝</span>
+      <span class="nav-brand-en">Sleepal</span>
+    </a>
+    <ul class="nav-items">
+      <li><a href="#character">角色介绍</a></li>
+      <li><a href="#works">作品案例</a></li>
+      <li><a href="#interactive">互动体验</a></li>
+      <li><a href="#contact">联系方式</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta magnetic">申请内测</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="top">
+  <video class="hero-video" autoplay muted loop playsinline poster="hero-poster.jpg" preload="metadata">
+    <source src="hero-video.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal">AI 睡眠伴侣</div>
+    <h1 class="hero-title" id="hero-title" data-text="懂你的情绪，更懂你的睡眠。"></h1>
+    <p class="hero-subtitle reveal reveal-delay-3">
+      眠眠宝 · Sleepal —— 为你此刻的心情，写下今夜的旋律。<br>
+      不是又一个白噪音库，是深夜里一位懂你的朋友。
+    </p>
+    <div class="hero-cta-row reveal reveal-delay-4">
+      <a href="#interactive" class="btn btn-primary magnetic">
+        体验 AI 生成 <span class="arrow">→</span>
+      </a>
+      <a href="#character" class="btn btn-ghost magnetic">认识眠眠</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">Scroll</div>
+</section>
+
+<!-- ═══ MARQUEE ═══ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item">温暖</span>
+    <span class="marquee-item">治愈</span>
+    <span class="marquee-item">专属</span>
+    <span class="marquee-item">懂你</span>
+    <span class="marquee-item">柔软</span>
+    <span class="marquee-item">陪伴</span>
+    <span class="marquee-item">安心</span>
+    <span class="marquee-item">私密</span>
+    <span class="marquee-item">温暖</span>
+    <span class="marquee-item">治愈</span>
+    <span class="marquee-item">专属</span>
+    <span class="marquee-item">懂你</span>
+    <span class="marquee-item">柔软</span>
+    <span class="marquee-item">陪伴</span>
+    <span class="marquee-item">安心</span>
+    <span class="marquee-item">私密</span>
+  </div>
+</div>
+
+<!-- ═══ MANIFESTO ═══ -->
+<section class="manifesto">
+  <div class="manifesto-mark reveal">写在前面</div>
+  <h2 class="manifesto-line reveal-blur">
+    眠眠宝，一位 <em>AI 睡眠伴侣</em>。<br>为你此刻的心情，写下今夜的旋律。
+  </h2>
+  <p class="manifesto-sub reveal reveal-delay-2">
+    不是又一个白噪音库，是深夜里一位懂你的朋友。
+  </p>
+</section>
+
+<!-- ═══ CHARACTER (眠眠 only) ═══ -->
+<section class="section" id="character">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">角色介绍</div>
+      <h2 class="section-title">这是<em>眠眠</em>。</h2>
+      <p class="section-lead">不是虚拟角色，是深夜里真实的陪伴。</p>
+    </div>
+
+    <div class="char-showcase">
+      <div class="char-frame reveal" id="char-frame">
+        <div class="char-frame-inner">
+          <img src="mianmian.png" alt="眠眠" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <div class="char-placeholder" style="display:none">
+            <svg class="char-placeholder-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <g fill="#FFF8F0" opacity="0.7">
+                <circle cx="35" cy="55" r="15"/>
+                <circle cx="50" cy="42" r="18"/>
+                <circle cx="65" cy="55" r="15"/>
+                <circle cx="50" cy="62" r="20"/>
+                <circle cx="38" cy="72" r="12"/>
+                <circle cx="62" cy="72" r="12"/>
+              </g>
+              <ellipse cx="50" cy="55" rx="14" ry="16" fill="#FFF8F0" opacity="0.7"/>
+              <circle cx="43" cy="52" r="2.5" fill="#0A192F"/>
+              <circle cx="57" cy="52" r="2.5" fill="#0A192F"/>
+              <circle cx="43" cy="60" r="3" fill="#FFE8D6" opacity="0.7"/>
+              <circle cx="57" cy="60" r="3" fill="#FFE8D6" opacity="0.7"/>
+              <path d="M 46 63 Q 50 66 54 63" stroke="#C49B2C" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            </svg>
+            <div class="char-placeholder-text">
+              把眠眠 3D 图<br>
+              命名为 mianmian.png<br>
+              放到本文件夹
+            </div>
+          </div>
+        </div>
+        <div class="char-notes">
+          <span class="note-tag n1">♪</span>
+          <span class="note-tag n2">♫</span>
+          <span class="note-tag n3">♩</span>
+          <span class="note-tag n4">♬</span>
+        </div>
+      </div>
+
+      <div class="char-content">
+        <div class="char-role reveal">Sleep Companion · 眠眠</div>
+        <h3 class="char-name reveal reveal-delay-1">眠眠</h3>
+        <p class="char-tagline reveal reveal-delay-2">
+          一只软萌小绵羊，你的 AI 睡眠伙伴。
+        </p>
+        <p class="char-desc reveal reveal-delay-2">
+          温柔耐心，永远在你需要的时候出现。它读懂你此刻的心情，为你写下今夜的旋律，用最熟悉的声音陪你入睡。<br><br>
+          从「使用工具」到「与朋友互动」，眠眠让科技也可以有温度。
+        </p>
+
+        <div class="char-personality reveal reveal-delay-3">
+          <div class="personality-item">
+            <div class="personality-label">性格</div>
+            <div class="personality-value">温柔 · 耐心 · 敏感</div>
+          </div>
+          <div class="personality-item">
+            <div class="personality-label">特长</div>
+            <div class="personality-value">听你说话，为你写歌</div>
+          </div>
+          <div class="personality-item">
+            <div class="personality-label">出没时间</div>
+            <div class="personality-value">深夜里，你睡不着的时候</div>
+          </div>
+          <div class="personality-item">
+            <div class="personality-label">最喜欢的事</div>
+            <div class="personality-value">看你安稳睡去</div>
+          </div>
+        </div>
+
+        <div class="char-features reveal reveal-delay-4">
+          <span class="char-feature">AI 实时生成</span>
+          <span class="char-feature">语音陪伴</span>
+          <span class="char-feature">声纹复刻</span>
+          <span class="char-feature">情绪感知</span>
+          <span class="char-feature">睡眠追踪</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THREE MOMENTS ═══ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">一个夜晚</div>
+      <h2 class="section-title">失眠的三个时刻，<br>眠眠都在。</h2>
+      <p class="section-lead">从入睡前的心情，到深夜的独白，再到清晨的宁静。</p>
+    </div>
+
+    <div class="moments">
+      <article class="moment reveal">
+        <div class="moment-time-block">
+          <div class="moment-time">22:00</div>
+          <div class="moment-label">Wind Down</div>
+        </div>
+        <div class="moment-content">
+          <h3 class="moment-head">说一句「今天」，AI 为你写下今夜的旋律。</h3>
+          <p class="moment-body">
+            下班回家，脑子还在转。打开眠眠宝，告诉它此刻的心情——「今天加班了」「有点低落」「说不上来的烦」。AI 毫秒生成一段只为你此刻情绪写的旋律。不需要选歌单，因为你不重复。
+          </p>
+          <span class="moment-tag">AI 实时生成</span>
+        </div>
+      </article>
+
+      <article class="moment reveal">
+        <div class="moment-time-block">
+          <div class="moment-time">01:00</div>
+          <div class="moment-label">Company</div>
+        </div>
+        <div class="moment-content">
+          <h3 class="moment-head">关了灯还是睡不着？跟眠眠说说话。</h3>
+          <p class="moment-body">
+            不用点亮屏幕，轻声说一声「眠眠」，一个软软的声音就回应你了。今天想说什么，我都在。从「使用工具」到「与朋友互动」，科技也可以有温度。
+          </p>
+          <span class="moment-tag">语音陪伴</span>
+        </div>
+      </article>
+
+      <article class="moment reveal">
+        <div class="moment-time-block">
+          <div class="moment-time">03:00</div>
+          <div class="moment-label">Familiar Voice</div>
+        </div>
+        <div class="moment-content">
+          <h3 class="moment-head">熟悉的声音还在耳边，你会睡得更好。</h3>
+          <p class="moment-body">
+            录一段家人、爱人、朋友的声音，眠眠可以用他们的声线，为你讲今晚的睡前故事。即使相隔千里，最想听到的声音也会陪你入睡。
+          </p>
+          <span class="moment-tag">声纹复刻</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">一些数字</div>
+      <h2 class="section-title">失眠不是一个人的战斗。</h2>
+      <p class="section-lead">这是我们所在的时代，也是眠眠宝想要陪伴的每一位。</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat reveal">
+        <div class="stat-num"><span data-count="3">0</span><span class="stat-unit">亿+</span></div>
+        <div class="stat-label">中国存在睡眠障碍的人群</div>
+        <div class="stat-sub">Nationwide</div>
+      </div>
+      <div class="stat reveal reveal-delay-1">
+        <div class="stat-num"><span data-count="38.2">0</span><span class="stat-unit">%</span></div>
+        <div class="stat-label">成年人失眠发生率</div>
+        <div class="stat-sub">Adult population</div>
+      </div>
+      <div class="stat reveal reveal-delay-2">
+        <div class="stat-num"><span data-count="84.3">0</span><span class="stat-unit">%</span></div>
+        <div class="stat-label">22–40 岁购买人群占比</div>
+        <div class="stat-sub">Core user</div>
+      </div>
+      <div class="stat reveal reveal-delay-3">
+        <div class="stat-num"><span data-count="6500">0</span><span class="stat-unit">亿</span></div>
+        <div class="stat-label">2027 睡眠经济规模</div>
+        <div class="stat-sub">Market size</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WORKS ═══ -->
+<section class="section" id="works">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">作品案例</div>
+      <h2 class="section-title">近期作品与营销内容</h2>
+      <p class="section-lead">品牌短片、社媒主视觉、达人合作素材，以及背后的故事。</p>
+    </div>
+    <div class="works-grid" id="works-grid"></div>
+  </div>
+</section>
+
+<!-- ═══ INTERACTIVE ═══ -->
+<section class="section" id="interactive">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">互动体验</div>
+      <h2 class="section-title">此刻的心情，<em>此刻的旋律</em>。</h2>
+      <p class="section-lead">告诉眠眠你现在的感受，AI 在毫秒内为你生成只属于今晚的助眠曲。</p>
+    </div>
+    <div class="demo-stage reveal">
+      <div class="demo-prompt">此刻，你的感受是——</div>
+      <div class="demo-picker" id="picker">
+        <button class="demo-chip" data-mood="tired">有点累</button>
+        <button class="demo-chip" data-mood="anxious">焦虑</button>
+        <button class="demo-chip" data-mood="missing">想家</button>
+        <button class="demo-chip" data-mood="empty">空落落</button>
+        <button class="demo-chip" data-mood="excited">兴奋睡不着</button>
+      </div>
+      <div class="demo-canvas">
+        <div class="demo-empty" id="demo-empty">— 请选择一个心情，眠眠会为你生成 —</div>
+        <div class="demo-loading" id="demo-loading">
+          <div class="dots"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="demo-loading-text">眠眠正在感受你的情绪…</div>
+        </div>
+        <div class="demo-track" id="demo-track">
+          <button class="track-play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
+          <div class="track-info">
+            <div class="track-title" id="track-title">凌晨的雨落在纸上</div>
+            <div class="track-meta" id="track-meta">钢琴 · 4:12 · 为「有点累」而作</div>
+          </div>
+          <div class="waveform" id="waveform"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ VOICES ═══ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">内测用户</div>
+      <h2 class="section-title">失眠不是一个人的事，<br>是这一代人共同的深夜。</h2>
+    </div>
+    <div class="voices-grid">
+      <div class="voice-card reveal">
+        <p class="voice-quote">被失眠困扰两年，最难熬的不是睡不着，是深夜想找人说话的时候，发现没有人可以打扰。</p>
+        <div class="voice-attr">小李 <span>28 · 程序员</span></div>
+      </div>
+      <div class="voice-card reveal reveal-delay-1">
+        <p class="voice-quote">加班到深夜是常态，躺下之后大脑还在放电影。不是没试过助眠 APP，那些声音千篇一律。</p>
+        <div class="voice-attr">小张 <span>26 · 金融</span></div>
+      </div>
+      <div class="voice-card reveal reveal-delay-2">
+        <p class="voice-quote">用了两周之后，我发现自己在期待睡觉这件事。以前是不得不睡，现在是想去被眠眠陪着。</p>
+        <div class="voice-attr">小周 <span>31 · 设计师</span></div>
+      </div>
+      <div class="voice-card reveal reveal-delay-3">
+        <p class="voice-quote">妈妈的声音讲晚安故事让我哭了。我很久没有跟妈妈打电话了。</p>
+        <div class="voice-attr">小陈 <span>25 · 咨询</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">联系方式</div>
+      <h2 class="section-title">加入我们的深夜。</h2>
+      <p class="section-lead">商务合作、达人对接、内测申请，都欢迎联系。<br>我们会在你需要的时候出现。</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card reveal">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.58l2.2-2.21c.28-.27.36-.66.25-1.01A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/></svg></div>
+        <div class="contact-label">电话</div>
+        <a href="tel:+8618000000000" class="contact-value">+86 180 0000 0000</a>
+        <div class="contact-note">工作日 9:00 – 18:00</div>
+      </div>
+      <div class="contact-card reveal reveal-delay-1">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+        <div class="contact-label">邮箱</div>
+        <a href="mailto:hi@sleepal.ai" class="contact-value">hi@sleepal.ai</a>
+        <div class="contact-note">24 小时内回复</div>
+      </div>
+      <div class="contact-card reveal reveal-delay-2">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
+        <div class="contact-label">微信</div>
+        <div class="contact-qr"><div class="qr-placeholder">QR 占位<br>sleepal-wx.png</div></div>
+        <div class="contact-note">扫码添加官方微信</div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="footer-brand">眠眠宝<span class="footer-brand-en">· Sleepal</span></div>
+      <div class="footer-slogan">用眠眠宝，睡得像宝宝</div>
+      <div class="footer-meta">© 2026 Sleepal · Made with quiet care</div>
+    </footer>
+  </div>
+</section>
+
+<script>
+// ═══════════════════════════════════════════════
+// Custom Cursor (soft warm glow)
+// ═══════════════════════════════════════════════
+(function(){
+  const dot = document.getElementById('cursor-dot');
+  const glow = document.getElementById('cursor-glow');
+  let mouseX = 0, mouseY = 0;
+  let glowX = 0, glowY = 0;
+
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+  });
+
+  // Smooth follow for glow
+  function anim() {
+    glowX += (mouseX - glowX) * 0.15;
+    glowY += (mouseY - glowY) * 0.15;
+    glow.style.transform = `translate3d(${glowX}px, ${glowY}px, 0)`;
+    requestAnimationFrame(anim);
+  }
+  anim();
+
+  // Hover states
+  document.querySelectorAll('a, button, .work-card, .voice-card, .contact-card, .demo-chip, .personality-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { dot.classList.add('hover'); glow.classList.add('hover'); });
+    el.addEventListener('mouseleave', () => { dot.classList.remove('hover'); glow.classList.remove('hover'); });
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// Text stagger reveal (hero title)
+// ═══════════════════════════════════════════════
+(function(){
+  const el = document.getElementById('hero-title');
+  const text = el.getAttribute('data-text');
+  const chars = [...text];
+  el.innerHTML = chars.map((c, i) => {
+    if (c === ' ') return ' ';
+    if (c === '，' || c === '。') return `<span class="split-word" style="transition-delay:${i * 0.04}s">${c}</span>`;
+    return `<span class="split-word" style="transition-delay:${i * 0.04}s">${c}</span>`;
+  }).join('').replace(/(<\/span>)(<span class="split-word"[^>]*>，)/g, '$1<br>$2');
+
+  // Trigger after page load
+  setTimeout(() => {
+    el.querySelectorAll('.split-word').forEach(w => w.classList.add('on'));
+  }, 300);
+})();
+
+// ═══════════════════════════════════════════════
+// Scroll reveal
+// ═══════════════════════════════════════════════
+(function(){
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '-50px' });
+
+  document.querySelectorAll('.reveal, .reveal-blur').forEach(el => observer.observe(el));
+})();
+
+// ═══════════════════════════════════════════════
+// Magnetic buttons
+// ═══════════════════════════════════════════════
+(function(){
+  document.querySelectorAll('.magnetic').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      btn.style.transform = `translate(${x * 0.25}px, ${y * 0.35}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = 'translate(0, 0)';
+    });
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// Ripple effect on buttons
+// ═══════════════════════════════════════════════
+(function(){
+  document.querySelectorAll('.btn, .nav-cta').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// 3D tilt on character frame
+// ═══════════════════════════════════════════════
+(function(){
+  const frame = document.getElementById('char-frame');
+  if (!frame) return;
+  frame.addEventListener('mousemove', (e) => {
+    const rect = frame.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 15;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -15;
+    frame.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${y}deg)`;
+  });
+  frame.addEventListener('mouseleave', () => {
+    frame.style.transform = 'perspective(1000px) rotateY(0) rotateX(0)';
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// Nav scroll
+// ═══════════════════════════════════════════════
+(function(){
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+  onScroll();
+  window.addEventListener('scroll', onScroll, {passive: true});
+})();
+
+// ═══════════════════════════════════════════════
+// Works grid
+// ═══════════════════════════════════════════════
+(function(){
+  const WORKS = [
+    { type: 'video',  title: '眠眠陪你入睡',    desc: '30 秒品牌短片', thumb: 'work-1.jpg' },
+    { type: 'video',  title: '手机里的音符',    desc: '功能演示动画',  thumb: 'work2-2.jpg' },
+    { type: 'poster', title: '深夜的温柔陪伴',  desc: '小红书主视觉',  thumb: 'work-4.jpg' },
+    { type: 'video',  title: '眠眠的一天',      desc: '用户故事短片',  thumb: 'work-6.jpg' },
+    { type: 'poster', title: '世界睡眠日',      desc: '节日限定海报',  thumb: 'work-8.jpg' },
+    { type: 'poster', title: 'AI 生成过程',    desc: '产品原理科普',  thumb: 'work2-5.jpg' }
+  ];
+  const grid = document.getElementById('works-grid');
+  WORKS.forEach((w, i) => {
+    const el = document.createElement('article');
+    el.className = 'work-card reveal';
+    el.style.transitionDelay = (i * 0.05) + 's';
+    el.innerHTML = `
+      <div class="work-thumb">
+        <img src="${w.thumb}" alt="${w.title}">
+        <div class="work-type">${w.type === 'video' ? '视频' : '海报'}</div>
+        ${w.type === 'video' ? '<div class="work-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></div>' : ''}
+      </div>
+      <div class="work-info">
+        <h4 class="work-title">${w.title}</h4>
+        <p class="work-desc">${w.desc}</p>
+      </div>
+    `;
+    grid.appendChild(el);
+    // Re-observe for reveal
+    new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.disconnect(); }
+      });
+    }, { threshold: 0.1 }).observe(el);
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// Waveform bars
+// ═══════════════════════════════════════════════
+(function(){
+  const wf = document.getElementById('waveform');
+  for (let i = 0; i < 24; i++) {
+    const s = document.createElement('span');
+    s.style.animationDelay = (i * 0.06) + 's';
+    wf.appendChild(s);
+  }
+})();
+
+// ═══════════════════════════════════════════════
+// Interactive AI demo + sparkle burst
+// ═══════════════════════════════════════════════
+(function(){
+  const TRACKS = {
+    tired:   { title: '凌晨的雨落在纸上',   meta: '钢琴 · 4:12 · 为「有点累」而作' },
+    anxious: { title: '让呼吸慢下来',         meta: '竖琴 + 环境音 · 5:08 · 为「焦虑」而作' },
+    missing: { title: '从前的月光',           meta: '大提琴 · 4:32 · 为「想家」而作' },
+    empty:   { title: '空房间里的一盏灯',   meta: '钢琴 · 3:58 · 为「空落落」而作' },
+    excited: { title: '让思绪落地',           meta: '弦乐 + 白噪音 · 6:20 · 为「兴奋睡不着」而作' }
+  };
+  const picker = document.getElementById('picker');
+  const empty = document.getElementById('demo-empty');
+  const loading = document.getElementById('demo-loading');
+  const track = document.getElementById('demo-track');
+  const tTitle = document.getElementById('track-title');
+  const tMeta = document.getElementById('track-meta');
+
+  function sparkleBurst(x, y) {
+    for (let i = 0; i < 12; i++) {
+      const p = document.createElement('div');
+      p.className = 'sparkle';
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      const angle = (i / 12) * Math.PI * 2;
+      const dist = 40 + Math.random() * 60;
+      p.style.setProperty('--x', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--y', Math.sin(angle) * dist + 'px');
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 800);
+    }
+  }
+
+  picker.addEventListener('click', (e) => {
+    const b = e.target.closest('.demo-chip');
+    if (!b) return;
+    const m = b.getAttribute('data-mood');
+
+    // Sparkle burst at click point
+    sparkleBurst(e.clientX, e.clientY);
+
+    picker.querySelectorAll('.demo-chip').forEach(c => c.classList.remove('active'));
+    b.classList.add('active');
+    empty.style.display = 'none';
+    track.classList.remove('on');
+    loading.classList.add('on');
+    setTimeout(() => {
+      loading.classList.remove('on');
+      tTitle.textContent = TRACKS[m].title;
+      tMeta.textContent = TRACKS[m].meta;
+      track.classList.add('on');
+    }, 1800);
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// Number counter animation
+// ═══════════════════════════════════════════════
+(function(){
+  const counters = document.querySelectorAll('[data-count]');
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      obs.unobserve(entry.target);
+      const el = entry.target;
+      const target = parseFloat(el.getAttribute('data-count'));
+      const duration = 1600;
+      const start = performance.now();
+      const isInt = Number.isInteger(target);
+
+      function step(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = target * eased;
+        el.textContent = isInt ? Math.round(value) : value.toFixed(1);
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }, { threshold: 0.4 });
+
+  counters.forEach(c => observer.observe(c));
+})();
+
+// ═══════════════════════════════════════════════
+// Note tags around character — random subtle motion
+// ═══════════════════════════════════════════════
+</script>
+
+</body>
+</html>
