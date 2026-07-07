@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A192F">
+<title>眠眠宝 Sleepal · AI 睡眠伴侣</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-primary: #0A192F;
+  --bg-secondary: #0F1F3D;
+  --bg-tertiary: #142B52;
+  --bg-card: rgba(20, 43, 82, 0.55);
+  --bg-card-hover: rgba(20, 43, 82, 0.8);
+  --border-subtle: rgba(255, 217, 124, 0.12);
+  --border-strong: rgba(255, 217, 124, 0.28);
+  --text-primary: #FFF8F0;
+  --text-secondary: rgba(255, 248, 240, 0.72);
+  --text-tertiary: rgba(255, 248, 240, 0.5);
+  --text-quaternary: rgba(255, 248, 240, 0.3);
+  --accent: #FFD97C;
+  --accent-bright: #FFE59E;
+  --accent-warm: #FFC85C;
+  --accent-glow: rgba(255, 217, 124, 0.2);
+  --accent-soft: rgba(255, 217, 124, 0.08);
+  --peach: #FFE8D6;
+  --dust-pink: #E8B4C8;
+  --dust-lilac: #C4B4E0;
+  --dust-mint: #B4E0D4;
+  --font-cn: "PingFang SC", "Source Han Sans SC", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-en: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Fraunces", "Songti SC", "STSong", Georgia, serif;
+  --font-mono: "SF Mono", "JetBrains Mono", "Menlo", monospace;
+  --max-width: 1700px;
+  --gutter: clamp(24px, 4vw, 80px);
+  --section-py: clamp(80px, 10vw, 160px);
+  --radius-sm: 12px;
+  --radius: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 40px;
+  --radius-pill: 100px;
+  --shadow-glow: 0 0 60px rgba(255, 217, 124, 0.2);
+  --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 0.4s;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
+img, video { max-width: 100%; height: auto; display: block; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; padding: 0; }
+body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-cn); font-weight: 300; line-height: 1.75; min-height: 100vh; overflow-x: hidden; letter-spacing: 0.01em; cursor: none; }
+body[data-lang="en"] { font-family: var(--font-en); }
+
+.cursor-dot, .cursor-glow { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; will-change: transform; transform: translate3d(-100px, -100px, 0); border-radius: 50%; }
+.cursor-dot { width: 8px; height: 8px; background: var(--accent); box-shadow: 0 0 12px var(--accent); transition: width 0.3s var(--ease), height 0.3s var(--ease), opacity 0.3s ease; margin-left: -4px; margin-top: -4px; }
+.cursor-glow { width: 40px; height: 40px; background: radial-gradient(circle, rgba(255, 217, 124, 0.35) 0%, transparent 70%); filter: blur(8px); transition: width 0.5s var(--ease), height 0.5s var(--ease), opacity 0.5s ease; margin-left: -20px; margin-top: -20px; }
+.cursor-dot.hover { width: 40px; height: 40px; margin-left: -20px; margin-top: -20px; background: transparent; border: 1.5px solid var(--accent); }
+.cursor-glow.hover { width: 100px; height: 100px; margin-left: -50px; margin-top: -50px; opacity: 0.7; }
+@media (hover: none) { body { cursor: auto; } .cursor-dot, .cursor-glow { display: none; } }
+
+.blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35; animation: blob-drift 20s ease-in-out infinite; will-change: transform; }
+.blob-1 { width: 500px; height: 500px; background: rgba(255, 217, 124, 0.25); top: -100px; right: -100px; }
+.blob-2 { width: 600px; height: 600px; background: rgba(196, 180, 224, 0.15); bottom: -200px; left: -150px; animation-delay: -10s; }
+.blob-3 { width: 400px; height: 400px; background: rgba(180, 224, 212, 0.1); top: 60%; left: 40%; animation-delay: -5s; }
+@keyframes blob-drift { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(60px,-40px) scale(1.1); } 66% { transform: translate(-40px,50px) scale(0.95); } }
+.stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.stars::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 12% 20%, rgba(255,248,240,0.7), transparent), radial-gradient(1.2px 1.2px at 25% 45%, rgba(232,204,106,0.6), transparent), radial-gradient(1px 1px at 42% 70%, rgba(255,248,240,0.5), transparent), radial-gradient(1.5px 1.5px at 58% 15%, rgba(232,204,106,0.7), transparent), radial-gradient(1px 1px at 72% 40%, rgba(255,248,240,0.6), transparent), radial-gradient(0.8px 0.8px at 85% 65%, rgba(255,248,240,0.5), transparent), radial-gradient(1.3px 1.3px at 92% 25%, rgba(232,204,106,0.6), transparent), radial-gradient(1px 1px at 15% 85%, rgba(255,248,240,0.4), transparent); animation: twinkle 5s ease-in-out infinite; }
+@keyframes twinkle { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--gutter); width: 100%; position: relative; z-index: 1; }
+.section { padding: var(--section-py) 0; position: relative; }
+.section-header { max-width: 800px; margin-bottom: 80px; }
+.section-eyebrow { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.32em; color: var(--accent); text-transform: uppercase; margin-bottom: 24px; }
+.section-eyebrow::before { content: ""; width: 32px; height: 1px; background: var(--accent); }
+.section-title { font-family: var(--font-cn); font-size: clamp(36px, 4vw, 56px); font-weight: 300; color: var(--text-primary); line-height: 1.25; margin-bottom: 20px; letter-spacing: 0.01em; }
+body[data-lang="en"] .section-title { font-family: var(--font-serif); font-weight: 400; font-style: italic; }
+.section-title em { font-style: normal; color: var(--accent); font-weight: 400; }
+.section-lead { font-family: var(--font-serif); font-style: italic; font-size: 18px; color: var(--text-secondary); max-width: 640px; line-height: 1.85; font-weight: 300; }
+
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 1s var(--ease), transform 1s var(--ease); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; } .reveal-delay-2 { transition-delay: 0.2s; } .reveal-delay-3 { transition-delay: 0.3s; } .reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-blur { filter: blur(10px); opacity: 0; transition: all 1.4s var(--ease); }
+.reveal-blur.visible { filter: blur(0); opacity: 1; }
+.split-word { display: inline-block; opacity: 0; transform: translateY(30px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+.split-word.on { opacity: 1; transform: translateY(0); }
+
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 0; transition: all var(--duration) var(--ease); background: transparent; border-bottom: 1px solid transparent; }
+.nav.scrolled { padding: 14px 0; background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); border-bottom-color: var(--border-subtle); }
+.nav-inner { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+.nav-brand { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+.nav-brand-cn { font-family: var(--font-cn); font-size: 20px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.06em; }
+.nav-brand-en { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--accent); letter-spacing: 0.03em; }
+.nav-items { display: flex; gap: 44px; align-items: center; }
+.nav-items a { font-family: var(--font-cn); font-size: 14px; color: var(--text-secondary); padding: 4px 0; position: relative; transition: color 0.3s ease; letter-spacing: 0.06em; }
+.nav-items a::after { content: ""; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--accent); transition: width 0.4s var(--ease); }
+.nav-items a:hover { color: var(--text-primary); }
+.nav-items a:hover::after { width: 100%; }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.lang-toggle { display: flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); background: rgba(20, 43, 82, 0.4); }
+.lang-toggle button { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--text-tertiary); padding: 6px 12px; border-radius: var(--radius-pill); transition: all 0.3s var(--ease); }
+.lang-toggle button.active { background: var(--accent); color: var(--bg-primary); font-weight: 500; }
+.lang-toggle button:not(.active):hover { color: var(--text-primary); }
+.nav-cta { font-family: var(--font-cn); font-size: 13px; color: var(--text-primary); padding: 10px 22px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); transition: all 0.4s var(--ease); letter-spacing: 0.05em; white-space: nowrap; position: relative; overflow: hidden; }
+.nav-cta:hover { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+
+.hero { position: relative; height: 100vh; min-height: 640px; overflow: hidden; display: flex; align-items: center; }
+.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.hero-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(10, 25, 47, 0.4) 0%, rgba(10, 25, 47, 0.5) 50%, rgba(10, 25, 47, 0.95) 100%), radial-gradient(ellipse at 30% 50%, rgba(10, 25, 47, 0.3) 0%, transparent 60%); }
+.hero-content { position: relative; z-index: 2; max-width: var(--max-width); width: 100%; margin: 0 auto; padding: 0 var(--gutter); }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase; margin-bottom: 40px; padding: 8px 20px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); background: rgba(10, 25, 47, 0.4); backdrop-filter: blur(10px); }
+.hero-eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+.hero-title { font-family: var(--font-cn); font-size: clamp(48px, 6.5vw, 96px); font-weight: 300; color: var(--text-primary); line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 32px; max-width: 1100px; text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5); }
+body[data-lang="en"] .hero-title { font-family: var(--font-serif); font-weight: 400; font-style: italic; letter-spacing: -0.01em; }
+.hero-subtitle { font-family: var(--font-serif); font-style: italic; font-size: clamp(18px, 1.8vw, 24px); color: var(--text-secondary); max-width: 640px; line-height: 1.7; margin-bottom: 56px; font-weight: 300; }
+.hero-cta-row { display: flex; gap: 32px; align-items: center; flex-wrap: wrap; }
+.hero-scroll-hint { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 3; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.3em; text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+.hero-scroll-hint::after { content: ""; width: 32px; height: 1px; background: var(--accent); opacity: 0.6; animation: scroll-line 2.5s ease-in-out infinite; }
+@keyframes scroll-line { 0%,100% { transform: scaleX(0.3); opacity: 0.3; } 50% { transform: scaleX(1); opacity: 0.9; } }
+
+.btn { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-cn); font-size: 15px; font-weight: 500; padding: 16px 32px; border-radius: var(--radius-pill); cursor: pointer; transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), background var(--duration) var(--ease); letter-spacing: 0.05em; white-space: nowrap; position: relative; overflow: hidden; will-change: transform; }
+.btn-primary { color: var(--bg-primary); background: var(--accent); box-shadow: 0 8px 32px rgba(255, 217, 124, 0.3); }
+.btn-primary:hover { box-shadow: 0 14px 40px rgba(255, 217, 124, 0.5); background: var(--accent-bright); }
+.btn-primary .arrow { transition: transform var(--duration) var(--ease); }
+.btn-primary:hover .arrow { transform: translateX(6px); }
+.btn-ghost { color: var(--text-primary); background: transparent; border: 1px solid var(--border-strong); }
+.btn-ghost:hover { background: rgba(255, 217, 124, 0.1); border-color: var(--accent); }
+.ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.4); transform: scale(0); animation: ripple 0.6s var(--ease); pointer-events: none; }
+@keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+.marquee { padding: 40px 0; overflow: hidden; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); background: linear-gradient(90deg, transparent 0%, rgba(255,217,124,0.03) 50%, transparent 100%); }
+.marquee-track { display: flex; gap: 60px; white-space: nowrap; animation: marquee 40s linear infinite; will-change: transform; }
+.marquee-item { font-family: var(--font-serif); font-style: italic; font-size: clamp(24px, 3vw, 40px); color: var(--text-tertiary); font-weight: 300; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 60px; }
+.marquee-item::after { content: "✦"; color: var(--accent); font-style: normal; font-size: 0.6em; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+.manifesto { min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px var(--gutter); text-align: center; position: relative; }
+.manifesto-mark { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase; margin-bottom: 48px; opacity: 0.7; }
+.manifesto-line { font-family: var(--font-cn); font-size: clamp(32px, 5vw, 64px); font-weight: 300; color: var(--text-primary); line-height: 1.35; letter-spacing: 0.02em; max-width: 900px; margin-bottom: 32px; }
+body[data-lang="en"] .manifesto-line { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+.manifesto-line em { font-style: normal; color: var(--accent); font-weight: 400; }
+.manifesto-sub { font-family: var(--font-serif); font-size: clamp(18px, 2vw, 22px); font-style: italic; color: rgba(245,237,227,0.65); font-weight: 300; letter-spacing: 0.02em; max-width: 640px; }
+
+.char-showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center; }
+.char-frame { position: relative; aspect-ratio: 1; max-width: 620px; margin: 0 auto; will-change: transform; transition: transform 0.6s var(--ease); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-card), var(--shadow-glow); border: 1px solid var(--border-subtle); }
+.char-frame-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.char-frame-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, transparent 50%, rgba(10, 25, 47, 0.4) 100%); pointer-events: none; }
+.char-frame-glow { position: absolute; inset: -20%; background: conic-gradient(from 0deg, transparent 0deg, rgba(255,217,124,0.2) 90deg, transparent 180deg); animation: rotate 15s linear infinite; pointer-events: none; opacity: 0.6; z-index: -1; }
+@keyframes rotate { to { transform: rotate(360deg); } }
+.char-frame-tag { position: absolute; bottom: 24px; left: 24px; font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.25em; text-transform: uppercase; padding: 6px 14px; background: rgba(10, 25, 47, 0.75); backdrop-filter: blur(12px); border-radius: var(--radius-pill); border: 1px solid var(--border-strong); }
+
+.char-content { max-width: 540px; }
+.char-role { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.32em; text-transform: uppercase; margin-bottom: 20px; }
+.char-name { font-family: var(--font-cn); font-size: clamp(60px, 6vw, 96px); font-weight: 400; color: var(--text-primary); line-height: 1; margin-bottom: 28px; letter-spacing: 0.03em; }
+body[data-lang="en"] .char-name { font-family: var(--font-serif); font-weight: 500; font-style: italic; }
+.char-tagline { font-family: var(--font-serif); font-style: italic; font-size: clamp(22px, 2.2vw, 28px); color: var(--accent-bright); margin-bottom: 36px; line-height: 1.5; font-weight: 400; }
+.char-desc { font-family: var(--font-cn); font-size: 16px; color: var(--text-secondary); line-height: 1.95; margin-bottom: 40px; }
+.char-personality { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px; }
+.personality-item { padding: 20px; border-left: 1px solid var(--border-strong); transition: all 0.4s var(--ease); }
+.personality-item:hover { border-left-color: var(--accent); background: var(--accent-soft); }
+.personality-label { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 8px; }
+.personality-value { font-family: var(--font-cn); font-size: 15px; color: var(--text-primary); line-height: 1.6; }
+.char-features { display: flex; flex-wrap: wrap; gap: 10px; }
+.char-feature { font-family: var(--font-cn); font-size: 12px; color: var(--accent); padding: 8px 16px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); background: var(--accent-soft); letter-spacing: 0.08em; }
+
+.moments { display: flex; flex-direction: column; gap: 0; }
+.moment { display: grid; grid-template-columns: 240px 1fr; gap: 80px; padding: 80px 0; border-top: 1px solid var(--border-subtle); align-items: start; }
+.moment:last-child { border-bottom: 1px solid var(--border-subtle); }
+.moment-time-block { position: relative; }
+.moment-time { font-family: var(--font-mono); font-size: clamp(56px, 8vw, 108px); font-weight: 200; color: var(--accent); letter-spacing: -0.03em; line-height: 1; margin-bottom: 12px; }
+.moment-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.32em; text-transform: uppercase; }
+.moment-content { padding-top: 20px; }
+.moment-head { font-family: var(--font-cn); font-size: clamp(22px, 2.6vw, 30px); font-weight: 400; color: var(--text-primary); line-height: 1.4; margin-bottom: 20px; }
+body[data-lang="en"] .moment-head { font-family: var(--font-serif); font-weight: 500; }
+.moment-body { font-family: var(--font-cn); font-size: 16px; color: var(--text-secondary); line-height: 1.95; margin-bottom: 24px; max-width: 620px; }
+.moment-tag { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.3em; text-transform: uppercase; }
+.moment-tag::before { content: ""; width: 24px; height: 1px; background: var(--accent); }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+.stat { text-align: center; padding: 40px 20px; border-right: 1px solid var(--border-subtle); }
+.stat:last-child { border-right: none; }
+.stat-num { font-family: var(--font-serif); font-size: clamp(48px, 6vw, 80px); font-weight: 400; color: var(--accent); line-height: 1; margin-bottom: 12px; letter-spacing: -0.02em; }
+.stat-unit { font-family: var(--font-serif); font-size: 24px; color: var(--accent); font-style: italic; margin-left: 4px; }
+.stat-label { font-family: var(--font-cn); font-size: 14px; color: var(--text-secondary); letter-spacing: 0.08em; }
+.stat-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 8px; }
+
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.feature-card { border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-subtle); transition: transform var(--duration) var(--ease), background var(--duration) var(--ease), border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease); cursor: pointer; position: relative; }
+.feature-card:hover { transform: translateY(-6px); border-color: var(--border-strong); box-shadow: var(--shadow-card-hover); }
+.feature-visual { position: relative; aspect-ratio: 16 / 10; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.feature-visual::before { content: ""; position: absolute; inset: 0; opacity: 0.9; }
+.feature-card:nth-child(1) .feature-visual::before { background: linear-gradient(135deg, #2A3D6E 0%, #4A3B6B 100%); }
+.feature-card:nth-child(2) .feature-visual::before { background: linear-gradient(135deg, #3A2D5C 0%, #6B4A6B 100%); }
+.feature-card:nth-child(3) .feature-visual::before { background: linear-gradient(135deg, #1F3A5C 0%, #2A5C6B 100%); }
+.feature-card:nth-child(4) .feature-visual::before { background: linear-gradient(135deg, #1F4A5C 0%, #3A6B6B 100%); }
+.feature-card:nth-child(5) .feature-visual::before { background: linear-gradient(135deg, #4A3D2A 0%, #6B5C3A 100%); }
+.feature-card:nth-child(6) .feature-visual::before { background: linear-gradient(135deg, #5C3A2A 0%, #8B5C3A 100%); }
+.feature-icon { position: relative; z-index: 2; width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(10, 25, 47, 0.4); backdrop-filter: blur(20px); border: 1px solid var(--border-strong); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); transition: transform 0.5s var(--ease); }
+.feature-card:hover .feature-icon { transform: scale(1.1) rotate(-3deg); }
+.feature-icon svg { width: 44px; height: 44px; color: var(--accent-bright); }
+.feature-badge { position: absolute; top: 16px; left: 16px; z-index: 3; padding: 6px 12px; border-radius: var(--radius-pill); background: rgba(10, 25, 47, 0.75); backdrop-filter: blur(12px); font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.2em; border: 1px solid var(--border-strong); text-transform: uppercase; }
+.feature-info { padding: 32px 32px 36px; }
+.feature-title { font-family: var(--font-cn); font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 10px; letter-spacing: 0.03em; }
+body[data-lang="en"] .feature-title { font-family: var(--font-serif); font-weight: 500; }
+.feature-desc { font-family: var(--font-cn); font-size: 14px; color: var(--text-secondary); line-height: 1.85; margin-bottom: 20px; }
+.feature-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.feature-tag { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.15em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); }
+
+.demo-stage { padding: 80px clamp(32px, 5vw, 80px); background: radial-gradient(ellipse at top right, rgba(255, 217, 124, 0.08), transparent 60%), linear-gradient(135deg, rgba(15, 33, 61, 0.6) 0%, rgba(10, 25, 47, 0.8) 100%); border: 1px solid var(--border-strong); border-radius: var(--radius-xl); backdrop-filter: blur(20px); position: relative; overflow: hidden; }
+.demo-stage::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.demo-prompt { font-family: var(--font-serif); font-size: clamp(24px, 3vw, 36px); color: var(--text-primary); margin-bottom: 44px; font-style: italic; font-weight: 400; line-height: 1.4; }
+.demo-picker { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 60px; }
+.demo-chip { font-family: var(--font-cn); font-size: 15px; color: var(--text-secondary); background: transparent; border: 1px solid rgba(255, 248, 240, 0.2); padding: 14px 26px; border-radius: var(--radius-pill); transition: all var(--duration) var(--ease); letter-spacing: 0.04em; position: relative; overflow: visible; }
+.demo-chip:hover { border-color: var(--accent); color: var(--text-primary); transform: translateY(-2px); }
+.demo-chip.active { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); font-weight: 500; box-shadow: 0 4px 20px var(--accent-glow); }
+.demo-canvas { min-height: 200px; padding: 48px 0; display: flex; align-items: center; justify-content: center; border-top: 1px solid var(--border-subtle); }
+.demo-empty { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--text-tertiary); letter-spacing: 0.03em; }
+.demo-loading { display: none; flex-direction: column; align-items: center; gap: 28px; }
+.demo-loading.on { display: flex; }
+.dots { display: flex; gap: 12px; }
+.dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: dot-jump 1.4s ease-in-out infinite; }
+.dots span:nth-child(2) { animation-delay: 0.15s; } .dots span:nth-child(3) { animation-delay: 0.3s; } .dots span:nth-child(4) { animation-delay: 0.45s; } .dots span:nth-child(5) { animation-delay: 0.6s; }
+@keyframes dot-jump { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-16px); opacity: 1; } }
+.demo-loading-text { font-family: var(--font-serif); font-size: 16px; font-style: italic; color: var(--text-secondary); letter-spacing: 0.03em; }
+.demo-track { display: none; align-items: center; gap: 40px; width: 100%; flex-wrap: wrap; }
+.demo-track.on { display: flex; }
+.track-play { width: 68px; height: 68px; border-radius: 50%; background: var(--accent); color: var(--bg-primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 30px var(--accent-glow); transition: transform var(--duration) var(--ease); flex-shrink: 0; }
+.track-play:hover { transform: scale(1.08); }
+.track-play svg { width: 24px; height: 24px; margin-left: 3px; }
+.track-info { flex: 1; min-width: 220px; }
+.track-title { font-family: var(--font-serif); font-size: clamp(24px, 2.6vw, 32px); color: var(--text-primary); margin-bottom: 8px; font-weight: 400; font-style: italic; letter-spacing: 0.01em; }
+.track-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.15em; text-transform: uppercase; }
+.waveform { flex: 1; min-width: 200px; height: 44px; display: flex; align-items: center; gap: 3px; }
+.waveform span { flex: 1; background: linear-gradient(180deg, var(--accent-bright), var(--accent)); border-radius: 2px; animation: wave 1.4s ease-in-out infinite; }
+@keyframes wave { 0%,100% { height: 20%; opacity: 0.5; } 50% { height: 100%; opacity: 1; } }
+
+.sparkle { position: fixed; pointer-events: none; z-index: 9998; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-bright); box-shadow: 0 0 8px var(--accent); animation: sparkle 0.8s var(--ease) forwards; }
+@keyframes sparkle { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; } }
+
+.voices-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 60px; }
+.voice-card { padding: 48px 44px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: all var(--duration) var(--ease); position: relative; }
+.voice-card:hover { border-color: var(--border-strong); transform: translateY(-4px); background: var(--bg-card-hover); }
+.voice-card::before { content: "\201C"; position: absolute; top: 24px; left: 32px; font-family: var(--font-serif); font-size: 60px; color: var(--accent); opacity: 0.4; line-height: 1; }
+.voice-quote { font-family: var(--font-serif); font-size: 18px; font-style: italic; color: var(--text-primary); line-height: 1.85; margin: 32px 0 32px; padding-left: 40px; font-weight: 400; }
+.voice-attr { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.24em; padding-left: 40px; }
+.voice-attr span { color: var(--text-tertiary); margin-left: 12px; }
+
+.contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 100px; }
+.contact-card { padding: 48px 40px; border-radius: var(--radius-lg); background: var(--bg-card); border: 1px solid var(--border-subtle); text-align: center; transition: all var(--duration) var(--ease); }
+.contact-card:hover { background: var(--bg-card-hover); border-color: var(--border-strong); transform: translateY(-4px); }
+.contact-icon { width: 64px; height: 64px; margin: 0 auto 24px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-warm)); display: flex; align-items: center; justify-content: center; color: var(--bg-primary); position: relative; }
+.contact-icon::before { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 1px solid var(--accent); opacity: 0; animation: pulse-ring 2s ease-out infinite; }
+@keyframes pulse-ring { 0% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 0; transform: scale(1.4); } }
+.contact-icon svg { width: 28px; height: 28px; fill: currentColor; }
+.contact-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.32em; text-transform: uppercase; margin-bottom: 16px; }
+.contact-value { display: block; font-family: var(--font-cn); font-size: 20px; font-weight: 500; color: var(--text-primary); margin-bottom: 12px; transition: color 0.3s ease; }
+.contact-value:hover { color: var(--accent); }
+.contact-note { font-family: var(--font-cn); font-size: 13px; color: var(--text-tertiary); letter-spacing: 0.05em; }
+.contact-qr { width: 120px; height: 120px; margin: 0 auto 12px; border-radius: var(--radius-sm); background: var(--bg-tertiary); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; }
+.qr-placeholder { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.2em; text-align: center; line-height: 1.6; }
+
+.footer { padding: 60px 0 0; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 20px; }
+.footer-brand { font-family: var(--font-cn); font-size: 16px; color: var(--text-primary); letter-spacing: 0.06em; }
+.footer-brand-en { font-family: var(--font-serif); font-style: italic; color: var(--accent); margin-left: 6px; }
+.footer-slogan { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--text-tertiary); flex: 1; text-align: center; }
+.footer-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-quaternary); letter-spacing: 0.15em; text-transform: uppercase; }
+
+@media (max-width: 1024px) {
+  .char-showcase { grid-template-columns: 1fr; gap: 60px; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .contact-grid { grid-template-columns: 1fr; gap: 16px; }
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  .voices-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 768px) {
+  body { cursor: auto; } .cursor-dot, .cursor-glow { display: none; }
+  .nav-items { display: none; }
+  .nav-cta { padding: 8px 16px; font-size: 12px; }
+  .lang-toggle button { padding: 5px 10px; font-size: 10px; }
+  .hero { min-height: 560px; }
+  .hero-title { font-size: clamp(36px, 8vw, 52px); }
+  .hero-eyebrow { font-size: 10px; padding: 6px 14px; margin-bottom: 28px; }
+  .hero-subtitle { font-size: 16px; margin-bottom: 40px; }
+  .hero-cta-row { gap: 16px; }
+  .btn { padding: 14px 24px; font-size: 14px; }
+  .section { padding: 80px 0; }
+  .section-header { margin-bottom: 48px; }
+  .section-title { font-size: clamp(28px, 6vw, 40px); }
+  .char-name { font-size: clamp(48px, 10vw, 64px); }
+  .char-tagline { font-size: 18px; }
+  .char-personality { grid-template-columns: 1fr; gap: 12px; }
+  .moment { grid-template-columns: 1fr; gap: 24px; padding: 48px 0; }
+  .moment-time { font-size: clamp(48px, 14vw, 72px); }
+  .features-grid { grid-template-columns: 1fr; gap: 20px; }
+  .demo-stage { padding: 48px 24px; }
+  .demo-prompt { font-size: 22px; margin-bottom: 32px; }
+  .demo-chip { padding: 12px 20px; font-size: 14px; }
+  .demo-track { flex-direction: column; align-items: stretch; text-align: center; gap: 24px; }
+  .waveform { min-width: unset; }
+  .contact-card { padding: 36px 24px; }
+  .voice-card { padding: 32px 24px; }
+  .footer { flex-direction: column; align-items: center; text-align: center; }
+  .footer-slogan { flex: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .hero-video { display: none; }
+  .hero { background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); }
+}
+</style>
+</head>
+<body data-lang="zh">
+
+<div class="cursor-glow" id="cursor-glow"></div>
+<div class="cursor-dot" id="cursor-dot"></div>
+
+<div class="blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+<div class="stars" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 12c1 0 1-4 2-4s1 6 2 6 1-8 2-8 1 10 2 10 1-12 2-12 1 14 2 14 1-10 2-10 1 6 2 6 1-4 2-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 1 1-3.7-6.7L21 4l-1 3.7A8 8 0 0 1 21 12z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="15.5" cy="12" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-breath" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/><circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/><circle cx="12" cy="12" r="2" fill="currentColor"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 1 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">
+      <span class="nav-brand-cn" data-i18n="brand">眠眠宝</span>
+      <span class="nav-brand-en">Sleepal</span>
+    </a>
+    <ul class="nav-items">
+      <li><a href="#character" data-i18n="nav_character">角色介绍</a></li>
+      <li><a href="#features" data-i18n="nav_features">核心功能</a></li>
+      <li><a href="#interactive" data-i18n="nav_interactive">互动体验</a></li>
+      <li><a href="#contact" data-i18n="nav_contact">联系方式</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="lang-toggle" role="group">
+        <button data-lang-btn="zh" class="active">中</button>
+        <button data-lang-btn="en">EN</button>
+      </div>
+      <a href="#contact" class="nav-cta magnetic" data-i18n="nav_cta">申请内测</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <video class="hero-video" autoplay muted loop playsinline poster="hero-poster.jpg" preload="metadata"><source src="hero-video.mp4" type="video/mp4"></video>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal" data-i18n="hero_eyebrow">AI 睡眠伴侣</div>
+    <h1 class="hero-title" id="hero-title"></h1>
+    <p class="hero-subtitle reveal reveal-delay-3" data-i18n="hero_subtitle"></p>
+    <div class="hero-cta-row reveal reveal-delay-4">
+      <a href="#interactive" class="btn btn-primary magnetic"><span data-i18n="hero_cta_1">体验 AI 生成</span> <span class="arrow">→</span></a>
+      <a href="#character" class="btn btn-ghost magnetic" data-i18n="hero_cta_2">认识眠眠</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">Scroll</div>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="marquee-track" id="marquee-track"></div></div>
+
+<section class="manifesto">
+  <div class="manifesto-mark reveal" data-i18n="manifesto_mark">写在前面</div>
+  <h2 class="manifesto-line reveal-blur" data-i18n="manifesto_line"></h2>
+  <p class="manifesto-sub reveal reveal-delay-2" data-i18n="manifesto_sub"></p>
+</section>
+
+<section class="section" id="character">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow" data-i18n="char_eyebrow">角色介绍</div>
+      <h2 class="section-title" data-i18n="char_title"></h2>
+      <p class="section-lead" data-i18n="char_lead"></p>
+    </div>
+    <div class="char-showcase">
+      <div class="char-frame reveal" id="char-frame">
+        <div class="char-frame-glow"></div>
+        <img class="char-frame-img" src="mianmian-scene.jpg" alt="眠眠 · Sleepal">
+        <div class="char-frame-overlay"></div>
+        <div class="char-frame-tag" data-i18n="char_tag">SLEEP COMPANION</div>
+      </div>
+      <div class="char-content">
+        <div class="char-role reveal" data-i18n="char_role">Sleep Companion · 眠眠</div>
+        <h3 class="char-name reveal reveal-delay-1" data-i18n="char_name">眠眠</h3>
+        <p class="char-tagline reveal reveal-delay-2" data-i18n="char_tagline"></p>
+        <p class="char-desc reveal reveal-delay-2" data-i18n="char_desc"></p>
+        <div class="char-personality reveal reveal-delay-3">
+          <div class="personality-item"><div class="personality-label" data-i18n="p1_label"></div><div class="personality-value" data-i18n="p1_value"></div></div>
+          <div class="personality-item"><div class="personality-label" data-i18n="p2_label"></div><div class="personality-value" data-i18n="p2_value"></div></div>
+          <div class="personality-item"><div class="personality-label" data-i18n="p3_label"></div><div class="personality-value" data-i18n="p3_value"></div></div>
+          <div class="personality-item"><div class="personality-label" data-i18n="p4_label"></div><div class="personality-value" data-i18n="p4_value"></div></div>
+        </div>
+        <div class="char-features reveal reveal-delay-4" id="char-features"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow" data-i18n="moments_eyebrow">一个夜晚</div>
+      <h2 class="section-title" data-i18n="moments_title"></h2>
+      <p class="section-lead" data-i18n="moments_lead"></p>
+    </div>
+    <div class="moments" id="moments-list"></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow" data-i18n="stats_eyebrow">一些数字</div>
+      <h2 class="section-title" data-i18n="stats_title"></h2>
+      <p class="section-lead" data-i18n="stats_lead"></p>
+    </div>
+    <div class="stats">
+      <div class="stat reveal"><div class="stat-num"><span data-count="3">0</span><span class="stat-unit" data-i18n="stats_1_unit">亿+</span></div><div class="stat-label" data-i18n="stats_1_label"></div><div class="stat-sub">Nationwide</div></div>
+      <div class="stat reveal reveal-delay-1"><div class="stat-num"><span data-count="38.2">0</span><span class="stat-unit">%</span></div><div class="stat-label" data-i18n="stats_2_label"></div><div class="stat-sub">Adult population</div></div>
+      <div class="stat reveal reveal-delay-2"><div class="stat-num"><span data-count="84.3">0</span><span class="stat-unit">%</span></div><div class="stat-label" data-i18n="stats_3_label"></div><div class="stat-sub">Core user</div></div>
+      <div class="stat reveal reveal-delay-3"><div class="stat-num"><span data-count="6500">0</span><span class="stat-unit" data-i18n="stats_4_unit">亿</span></div><div class="stat-label" data-i18n="stats_4_label"></div><div class="stat-sub">Market size</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow" data-i18n="features_eyebrow">核心功能</div>
+      <h2 class="section-title" data-i18n="features_title"></h2>
+      <p class="section-lead" data-i18n="features_lead"></p>
+    </div>
+    <div class="features-grid" id="features-grid"></div>
+  </div>
+</section>
+
+<section class="section" id="interactive">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow" data-i18n="demo_eyebrow">互动体验</div>
+      <h2 class="section-title" data-i18n="demo_title"></h2>
+      <p class="section-lead" data-i18n="demo_lead"></p>
+    </div>
+    <div class="demo-stage reveal">
+      <div class="demo-prompt" data-i18n="demo_prompt">此刻，你的感受是——</div>
+      <div class="demo-picker" id="picker"></div>
+      <div class="demo-canvas">
+        <div class="demo-empty" id="demo-empty" data-i18n="demo_empty">— 请选择一个心情，眠眠会为你生成 —</div>
+        <div class="demo-loading" id="demo-loading">
+          <div class="dots"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="demo-loading-text" data-i18n="demo_loading">眠眠正在感受你的情绪…</div>
+        </div>
+        <div class="demo-track" id="demo-track">
+          <button class="track-play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
+          <div class="track-info">
+            <div class="track-title" id="track-title">凌晨的雨落在纸上</div>
+            <div class="track-meta" id="track-meta">钢琴 · 4:12 · 为「有点累」而作</div>
+          </div>
+          <div class="waveform" id="waveform"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow" data-i18n="voices_eyebrow">内测用户</div>
+      <h2 class="section-title" data-i18n="voices_title"></h2>
+    </div>
+    <div class="voices-grid" id="voices-grid"></div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow" data-i18n="contact_eyebrow">联系方式</div>
+      <h2 class="section-title" data-i18n="contact_title">加入我们的深夜。</h2>
+      <p class="section-lead" data-i18n="contact_lead"></p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card reveal">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.58l2.2-2.21c.28-.27.36-.66.25-1.01A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/></svg></div>
+        <div class="contact-label" data-i18n="contact_phone_label">电话</div>
+        <a href="tel:+8618000000000" class="contact-value">+86 180 0000 0000</a>
+        <div class="contact-note" data-i18n="contact_phone_note">工作日 9:00 – 18:00</div>
+      </div>
+      <div class="contact-card reveal reveal-delay-1">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+        <div class="contact-label" data-i18n="contact_mail_label">邮箱</div>
+        <a href="mailto:hi@sleepal.ai" class="contact-value">hi@sleepal.ai</a>
+        <div class="contact-note" data-i18n="contact_mail_note">24 小时内回复</div>
+      </div>
+      <div class="contact-card reveal reveal-delay-2">
+        <div class="contact-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
+        <div class="contact-label" data-i18n="contact_wx_label">微信</div>
+        <div class="contact-qr"><div class="qr-placeholder">QR<br>sleepal-wx.png</div></div>
+        <div class="contact-note" data-i18n="contact_wx_note">扫码添加官方微信</div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="footer-brand"><span data-i18n="brand">眠眠宝</span><span class="footer-brand-en">· Sleepal</span></div>
+      <div class="footer-slogan" data-i18n="slogan">用眠眠宝，睡得像宝宝</div>
+      <div class="footer-meta" data-i18n="footer_meta">© 2026 Sleepal · Made with quiet care</div>
+    </footer>
+  </div>
+</section>
+
+<script>
+const I18N = {
+  zh: {
+    brand: "眠眠宝", slogan: "用眠眠宝，睡得像宝宝",
+    nav_character: "角色介绍", nav_features: "核心功能", nav_interactive: "互动体验", nav_contact: "联系方式", nav_cta: "申请内测",
+    hero_eyebrow: "AI 睡眠伴侣", hero_title: "懂你的情绪，更懂你的睡眠。",
+    hero_subtitle: "眠眠宝 · Sleepal —— 为你此刻的心情，写下今夜的旋律。不是又一个白噪音库，是深夜里一位懂你的朋友。",
+    hero_cta_1: "体验 AI 生成", hero_cta_2: "认识眠眠",
+    marquee: ["温暖", "治愈", "专属", "懂你", "柔软", "陪伴", "安心", "私密"],
+    manifesto_mark: "写在前面",
+    manifesto_line: '眠眠宝，一位 <em>AI 睡眠伴侣</em>。<br>为你此刻的心情，写下今夜的旋律。',
+    manifesto_sub: "不是又一个白噪音库，是深夜里一位懂你的朋友。",
+    char_eyebrow: "角色介绍", char_title: "这是<em>眠眠</em>。", char_lead: "不是虚拟角色，是深夜里真实的陪伴。",
+    char_tag: "SLEEP COMPANION", char_role: "Sleep Companion · 眠眠", char_name: "眠眠",
+    char_tagline: "一只软萌小绵羊，你的 AI 睡眠伙伴。",
+    char_desc: "温柔耐心，永远在你需要的时候出现。它读懂你此刻的心情，为你写下今夜的旋律，用最熟悉的声音陪你入睡。从「使用工具」到「与朋友互动」，眠眠让科技也可以有温度。",
+    p1_label: "性格", p1_value: "温柔 · 耐心 · 敏感",
+    p2_label: "特长", p2_value: "听你说话，为你写歌",
+    p3_label: "出没时间", p3_value: "深夜里，你睡不着的时候",
+    p4_label: "最喜欢的事", p4_value: "看你安稳睡去",
+    char_features: ["AI 实时生成", "语音陪伴", "声纹复刻", "情绪感知", "睡眠追踪"],
+    moments_eyebrow: "一个夜晚", moments_title: "失眠的三个时刻，<br>眠眠都在。", moments_lead: "从入睡前的心情，到深夜的独白，再到清晨的宁静。",
+    moments: [
+      { time: "22:00", label: "Wind Down", head: "说一句「今天」，AI 为你写下今夜的旋律。", body: "下班回家，脑子还在转。打开眠眠宝，告诉它此刻的心情——「今天加班了」「有点低落」「说不上来的烦」。AI 毫秒生成一段只为你此刻情绪写的旋律。", tag: "AI 实时生成" },
+      { time: "01:00", label: "Company", head: "关了灯还是睡不着？跟眠眠说说话。", body: "不用点亮屏幕，轻声说一声「眠眠」，一个软软的声音就回应你了。今天想说什么，我都在。从「使用工具」到「与朋友互动」，科技也可以有温度。", tag: "语音陪伴" },
+      { time: "03:00", label: "Familiar Voice", head: "熟悉的声音还在耳边，你会睡得更好。", body: "录一段家人、爱人、朋友的声音，眠眠可以用他们的声线，为你讲今晚的睡前故事。即使相隔千里，最想听到的声音也会陪你入睡。", tag: "声纹复刻" }
+    ],
+    stats_eyebrow: "一些数字", stats_title: "失眠不是一个人的战斗。", stats_lead: "这是我们所在的时代，也是眠眠宝想要陪伴的每一位。",
+    stats_1_label: "中国存在睡眠障碍的人群", stats_1_unit: "亿+",
+    stats_2_label: "成年人失眠发生率",
+    stats_3_label: "22–40 岁购买人群占比",
+    stats_4_label: "2027 睡眠经济规模", stats_4_unit: "亿",
+    features_eyebrow: "核心功能", features_title: "眠眠为你准备的<em>六种陪伴</em>。", features_lead: "从入睡前的一首曲子，到深夜的一句话，再到整夜的守护。",
+    features: [
+      { icon: "i-wave",   badge: "AI",       title: "AI 定制白噪音",   desc: "根据你此刻的情绪、环境、偏好，AI 毫秒生成属于今夜的助眠白噪音。雨声、海浪、篝火、森林——每一次都不重复。", tags: ["情绪感知", "实时生成", "环境音"] },
+      { icon: "i-music",  badge: "音乐",     title: "眠眠音乐小窝",   desc: "属于你的睡前音乐 SPA。轻钢琴、竖琴、大提琴、白噪音，AI 混音编排，为你的一整晚温柔编织。",           tags: ["AI 编曲", "多元曲风", "定时"] },
+      { icon: "i-chat",   badge: "陪伴",     title: "深夜私密对话",   desc: "关了灯还是睡不着？和眠眠说说话。它记得你的名字、你的困扰、你说过的每一句晚安。",                     tags: ["语音互动", "情绪回应", "记忆"] },
+      { icon: "i-breath", badge: "冥想",     title: "入睡呼吸练习",   desc: "跟着圆点节奏，一呼一吸，让思绪慢慢落地。4-7-8 呼吸法、深度放松、专注冥想。",                       tags: ["3/5/10 分钟", "呼吸引导", "冥想"] },
+      { icon: "i-shield", badge: "守护",     title: "整夜睡眠守护",   desc: "记录你的入睡时间、深睡时长、醒来次数，用眠眠可爱的方式呈现。每天一份温柔的睡眠建议。",           tags: ["睡眠评分", "趋势分析", "AI 建议"] },
+      { icon: "i-bag",    badge: "好物",     title: "眠眠好物商城",   desc: "香薰、抱枕、眼罩、小夜灯、精油礼盒——将眠眠的温柔延伸到你的每一夜。",                             tags: ["精心挑选", "IP 联名", "7 天无忧"] }
+    ],
+    demo_eyebrow: "互动体验", demo_title: "此刻的心情，<em>此刻的旋律</em>。", demo_lead: "告诉眠眠你现在的感受，AI 在毫秒内为你生成只属于今晚的助眠曲。",
+    demo_prompt: "此刻，你的感受是——",
+    moods: [
+      { id: "tired",   label: "有点累",       track: { title: "凌晨的雨落在纸上",     meta: "钢琴 · 4:12 · 为「有点累」而作" } },
+      { id: "anxious", label: "焦虑",         track: { title: "让呼吸慢下来",           meta: "竖琴 + 环境音 · 5:08 · 为「焦虑」而作" } },
+      { id: "missing", label: "想家",         track: { title: "从前的月光",             meta: "大提琴 · 4:32 · 为「想家」而作" } },
+      { id: "empty",   label: "空落落",       track: { title: "空房间里的一盏灯",     meta: "钢琴 · 3:58 · 为「空落落」而作" } },
+      { id: "excited", label: "兴奋睡不着",   track: { title: "让思绪落地",             meta: "弦乐 + 白噪音 · 6:20 · 为「兴奋睡不着」而作" } }
+    ],
+    demo_empty: "— 请选择一个心情，眠眠会为你生成 —", demo_loading: "眠眠正在感受你的情绪…",
+    voices_eyebrow: "内测用户", voices_title: "失眠不是一个人的事，<br>是这一代人共同的深夜。",
+    voices: [
+      { quote: "被失眠困扰两年，最难熬的不是睡不着，是深夜想找人说话的时候，发现没有人可以打扰。", who: "小李", meta: "28 · 程序员" },
+      { quote: "加班到深夜是常态，躺下之后大脑还在放电影。不是没试过助眠 APP，那些声音千篇一律。", who: "小张", meta: "26 · 金融" },
+      { quote: "用了两周之后，我发现自己在期待睡觉这件事。以前是不得不睡，现在是想去被眠眠陪着。", who: "小周", meta: "31 · 设计师" },
+      { quote: "妈妈的声音讲晚安故事让我哭了。我很久没有跟妈妈打电话了。", who: "小陈", meta: "25 · 咨询" }
+    ],
+    contact_eyebrow: "联系方式", contact_title: "加入我们的深夜。", contact_lead: "商务合作、达人对接、内测申请，都欢迎联系。<br>我们会在你需要的时候出现。",
+    contact_phone_label: "电话", contact_phone_note: "工作日 9:00 – 18:00",
+    contact_mail_label: "邮箱", contact_mail_note: "24 小时内回复",
+    contact_wx_label: "微信", contact_wx_note: "扫码添加官方微信",
+    footer_meta: "© 2026 眠眠宝 Sleepal · Made with quiet care"
+  },
+  en: {
+    brand: "Sleepal", slogan: "Sleep like a baby, with Sleepal",
+    nav_character: "About", nav_features: "Features", nav_interactive: "Try It", nav_contact: "Contact", nav_cta: "Join beta",
+    hero_eyebrow: "AI Sleep Companion", hero_title: "Reads your mood. Knows your sleep.",
+    hero_subtitle: "Sleepal — for your mood tonight, a melody tonight. Not another white-noise library. A friend in the dark hours who actually gets you.",
+    hero_cta_1: "Try the AI", hero_cta_2: "Meet Mianmian",
+    marquee: ["Warm", "Healing", "Yours", "Understands", "Soft", "Company", "Comfort", "Private"],
+    manifesto_mark: "A Note",
+    manifesto_line: 'Sleepal, an <em>AI sleep companion</em>.<br>For your mood tonight, a melody tonight.',
+    manifesto_sub: "Not another white-noise library. A friend in the dark hours who gets you.",
+    char_eyebrow: "About", char_title: "Meet <em>Mianmian</em>.", char_lead: "Not a virtual character. Real company for the darker hours.",
+    char_tag: "SLEEP COMPANION", char_role: "Sleep Companion · Mianmian", char_name: "Mianmian",
+    char_tagline: "A soft little sheep. Your AI sleep buddy.",
+    char_desc: "Gentle, patient, and always there when you need it. Mianmian reads your mood right now, composes a lullaby made for tonight, and can even use the voice you miss most to send you to sleep. Not a tool — a companion who makes technology feel warm.",
+    p1_label: "Personality", p1_value: "Gentle · Patient · Sensitive",
+    p2_label: "Best At", p2_value: "Listening, and writing songs for you",
+    p3_label: "Appears", p3_value: "Late at night, when sleep won't come",
+    p4_label: "Loves", p4_value: "Watching you drift off",
+    char_features: ["Real-time AI", "Voice companion", "Voice cloning", "Emotion aware", "Sleep tracking"],
+    moments_eyebrow: "One night", moments_title: "Three moments of a sleepless night.<br>Mianmian, all three.", moments_lead: "From the mood before sleep, to the late-night monologue, to the quiet of dawn.",
+    moments: [
+      { time: "22:00", label: "Wind Down", head: "Say a word about your day. AI writes tonight's melody.", body: "You're home from work. Your mind is still going. Open Sleepal and tell it how you feel — 'worked late', 'a little down', 'restless'. The AI composes a piece made only for this moment.", tag: "REAL-TIME AI" },
+      { time: "01:00", label: "Company", head: "Lights out, still awake? Talk to Mianmian.", body: "You don't need to unlock your phone. Whisper 'Mianmian' — a soft voice answers. Whatever you want to say tonight, I'm here. Not a tool. A companion.", tag: "VOICE COMPANION" },
+      { time: "03:00", label: "Familiar Voice", head: "The right voice makes sleep easier.", body: "Record your family, your partner, a friend. Mianmian can use their voice to tell you tonight's bedtime story. Even across oceans, the voice you miss most can still see you off to sleep.", tag: "VOICE CLONING" }
+    ],
+    stats_eyebrow: "The numbers", stats_title: "Insomnia isn't a solo experience.", stats_lead: "This is the world we live in, and everyone Sleepal is here to keep company.",
+    stats_1_label: "People in China with sleep disorders", stats_1_unit: "+",
+    stats_2_label: "Adult insomnia rate",
+    stats_3_label: "Buyers aged 22 to 40",
+    stats_4_label: "2027 sleep economy size (RMB)", stats_4_unit: "B",
+    features_eyebrow: "Features", features_title: "Six ways Mianmian <em>keeps you company</em>.", features_lead: "From a song before you sleep, to a word in the middle of the night, to guarding your rest till dawn.",
+    features: [
+      { icon: "i-wave",   badge: "AI",       title: "AI White Noise",       desc: "Based on your mood, environment, and preferences, the AI generates tonight's sleep sound in milliseconds. Rain, waves, campfire, forest — never the same twice.", tags: ["Mood-aware", "Real-time", "Ambient"] },
+      { icon: "i-music",  badge: "MUSIC",    title: "Music Nest",           desc: "Your bedtime music spa. Piano, harp, cello, ambient — AI-mixed and arranged, gently woven for your night.", tags: ["AI composed", "Multi-genre", "Timer"] },
+      { icon: "i-chat",   badge: "COMPANY",  title: "Late-Night Chat",      desc: "Lights out and still awake? Talk to Mianmian. It remembers your name, your worries, and every goodnight you've said.", tags: ["Voice chat", "Empathy", "Memory"] },
+      { icon: "i-breath", badge: "MEDITATE", title: "Breathing Exercise",   desc: "Follow the pulse. Breathe in, breathe out. Let thoughts settle. 4-7-8 breathing, deep release, focused meditation.", tags: ["3/5/10 min", "Guided", "Meditation"] },
+      { icon: "i-shield", badge: "GUARD",    title: "Sleep Guard",          desc: "Tracks your bedtime, deep sleep, and awakenings — presented in Mianmian's gentle style. A soft daily insight.", tags: ["Sleep score", "Trends", "AI advice"] },
+      { icon: "i-bag",    badge: "SHOP",     title: "Cozy Store",           desc: "Diffusers, pillows, eye masks, night lights, essential oils — Mianmian's warmth, extended into every night.", tags: ["Curated", "IP goods", "7-day return"] }
+    ],
+    demo_eyebrow: "Try it", demo_title: "Your mood right now, <em>a melody right now</em>.", demo_lead: "Tell Mianmian how you feel — the AI writes tonight's lullaby in milliseconds.",
+    demo_prompt: "Right now, you feel —",
+    moods: [
+      { id: "tired",   label: "A bit tired", track: { title: "Rain on paper before dawn",    meta: "PIANO · 4:12 · MADE FOR TIRED" } },
+      { id: "anxious", label: "Anxious",     track: { title: "Slower breath",                meta: "HARP + AMBIENT · 5:08 · MADE FOR ANXIOUS" } },
+      { id: "missing", label: "Homesick",    track: { title: "Moonlight from before",        meta: "CELLO · 4:32 · MADE FOR HOMESICK" } },
+      { id: "empty",   label: "Empty",       track: { title: "A single lamp",                meta: "PIANO · 3:58 · MADE FOR EMPTY" } },
+      { id: "excited", label: "Wired",       track: { title: "Let the thoughts land",        meta: "STRINGS + NOISE · 6:20 · MADE FOR WIRED" } }
+    ],
+    demo_empty: "— Pick a mood. Mianmian will compose one for you —", demo_loading: "Mianmian is feeling your emotion…",
+    voices_eyebrow: "From beta", voices_title: "Insomnia isn't a solo experience.<br>It's this generation's shared late night.",
+    voices: [
+      { quote: "After two years of insomnia, the worst part isn't not sleeping. It's wanting to talk to someone at 3am and realising there's no one you can bother.", who: "Xiao Li", meta: "28 · Developer" },
+      { quote: "Working late is normal. But when I lie down my brain is still running movies. I've tried sleep apps — same sounds every time.", who: "Xiao Zhang", meta: "26 · Finance" },
+      { quote: "After two weeks I noticed I was looking forward to sleep. Not something I had to do — something I wanted to do, with Mianmian.", who: "Xiao Zhou", meta: "31 · Designer" },
+      { quote: "The bedtime story in my mother's voice made me cry. I hadn't called her in a long time.", who: "Xiao Chen", meta: "25 · Consulting" }
+    ],
+    contact_eyebrow: "Contact", contact_title: "Come find us in the dark.", contact_lead: "Business, KOL partnerships, beta requests — we're all ears.<br>We show up when you need us.",
+    contact_phone_label: "Phone", contact_phone_note: "Weekdays 9:00 – 18:00",
+    contact_mail_label: "Email", contact_mail_note: "Reply within 24 hours",
+    contact_wx_label: "WeChat", contact_wx_note: "Scan to add official WeChat",
+    footer_meta: "© 2026 Sleepal · Made with quiet care"
+  }
+};
+
+let currentLang = 'zh';
+
+function renderAll() {
+  const d = I18N[currentLang];
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (d[k] !== undefined) el.innerHTML = d[k];
+  });
+
+  const titleEl = document.getElementById('hero-title');
+  titleEl.innerHTML = '';
+  const text = d.hero_title;
+  [...text].forEach((c, i) => {
+    if (c === ' ') { titleEl.appendChild(document.createTextNode(' ')); return; }
+    const span = document.createElement('span');
+    span.className = 'split-word';
+    span.style.transitionDelay = (i * 0.04) + 's';
+    span.textContent = c;
+    titleEl.appendChild(span);
+  });
+  setTimeout(() => titleEl.querySelectorAll('.split-word').forEach(w => w.classList.add('on')), 200);
+
+  const mq = document.getElementById('marquee-track');
+  mq.innerHTML = '';
+  [...d.marquee, ...d.marquee].forEach(w => {
+    const s = document.createElement('span'); s.className = 'marquee-item'; s.textContent = w;
+    mq.appendChild(s);
+  });
+
+  const cf = document.getElementById('char-features');
+  cf.innerHTML = '';
+  d.char_features.forEach(f => {
+    const s = document.createElement('span'); s.className = 'char-feature'; s.textContent = f;
+    cf.appendChild(s);
+  });
+
+  const mo = document.getElementById('moments-list');
+  mo.innerHTML = '';
+  d.moments.forEach(m => {
+    const el = document.createElement('article');
+    el.className = 'moment reveal';
+    el.innerHTML = '<div class="moment-time-block"><div class="moment-time">' + m.time + '</div><div class="moment-label">' + m.label + '</div></div><div class="moment-content"><h3 class="moment-head">' + m.head + '</h3><p class="moment-body">' + m.body + '</p><span class="moment-tag">' + m.tag + '</span></div>';
+    mo.appendChild(el);
+  });
+
+  const fg = document.getElementById('features-grid');
+  fg.innerHTML = '';
+  d.features.forEach((f, i) => {
+    const el = document.createElement('article');
+    el.className = 'feature-card reveal';
+    el.style.transitionDelay = (i * 0.05) + 's';
+    el.innerHTML = '<div class="feature-visual"><div class="feature-badge">' + f.badge + '</div><div class="feature-icon"><svg><use href="#' + f.icon + '"/></svg></div></div><div class="feature-info"><h4 class="feature-title">' + f.title + '</h4><p class="feature-desc">' + f.desc + '</p><div class="feature-tags">' + f.tags.map(t => '<span class="feature-tag">' + t + '</span>').join('') + '</div></div>';
+    fg.appendChild(el);
+  });
+
+  const p = document.getElementById('picker');
+  p.innerHTML = '';
+  d.moods.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'demo-chip'; b.setAttribute('data-mood', m.id); b.textContent = m.label;
+    p.appendChild(b);
+  });
+
+  const vg = document.getElementById('voices-grid');
+  vg.innerHTML = '';
+  d.voices.forEach((v, i) => {
+    const el = document.createElement('div');
+    el.className = 'voice-card reveal';
+    el.style.transitionDelay = (i * 0.05) + 's';
+    el.innerHTML = '<p class="voice-quote">' + v.quote + '</p><div class="voice-attr">' + v.who + ' <span>' + v.meta + '</span></div>';
+    vg.appendChild(el);
+  });
+
+  document.querySelectorAll('.reveal:not(.visible), .reveal-blur:not(.visible)').forEach(el => revealObserver.observe(el));
+}
+
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); }
+  });
+}, { threshold: 0.15, rootMargin: '-30px' });
+
+(function(){
+  const dot = document.getElementById('cursor-dot');
+  const glow = document.getElementById('cursor-glow');
+  let mX = 0, mY = 0, gX = 0, gY = 0;
+  window.addEventListener('mousemove', (e) => {
+    mX = e.clientX; mY = e.clientY;
+    dot.style.transform = 'translate3d(' + mX + 'px,' + mY + 'px,0)';
+  });
+  function anim() {
+    gX += (mX - gX) * 0.15; gY += (mY - gY) * 0.15;
+    glow.style.transform = 'translate3d(' + gX + 'px,' + gY + 'px,0)';
+    requestAnimationFrame(anim);
+  }
+  anim();
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest('a, button, .voice-card, .contact-card, .demo-chip, .personality-item, .feature-card')) {
+      dot.classList.add('hover'); glow.classList.add('hover');
+    }
+  });
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest('a, button, .voice-card, .contact-card, .demo-chip, .personality-item, .feature-card')) {
+      dot.classList.remove('hover'); glow.classList.remove('hover');
+    }
+  });
+})();
+
+(function(){
+  const btns = document.querySelectorAll('[data-lang-btn]');
+  btns.forEach(b => b.addEventListener('click', () => {
+    currentLang = b.getAttribute('data-lang-btn');
+    document.body.setAttribute('data-lang', currentLang);
+    document.documentElement.setAttribute('lang', currentLang === 'zh' ? 'zh-CN' : 'en');
+    btns.forEach(x => x.classList.toggle('active', x === b));
+    renderAll();
+    bindInteractions();
+    try { localStorage.setItem('sleepal_lang', currentLang); } catch(e) {}
+  }));
+  try {
+    const saved = localStorage.getItem('sleepal_lang');
+    if (saved && I18N[saved]) {
+      currentLang = saved;
+      document.body.setAttribute('data-lang', saved);
+      btns.forEach(x => x.classList.toggle('active', x.getAttribute('data-lang-btn') === saved));
+    }
+  } catch(e) {}
+})();
+
+(function(){
+  const nav = document.getElementById('nav');
+  const on = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+  on(); window.addEventListener('scroll', on, {passive: true});
+})();
+
+(function(){
+  const wf = document.getElementById('waveform');
+  for (let i = 0; i < 24; i++) {
+    const s = document.createElement('span'); s.style.animationDelay = (i * 0.06) + 's'; wf.appendChild(s);
+  }
+})();
+
+(function(){
+  const frame = document.getElementById('char-frame');
+  if (!frame) return;
+  frame.addEventListener('mousemove', (e) => {
+    const r = frame.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width - 0.5) * 12;
+    const y = ((e.clientY - r.top) / r.height - 0.5) * -12;
+    frame.style.transform = 'perspective(1000px) rotateY(' + x + 'deg) rotateX(' + y + 'deg)';
+  });
+  frame.addEventListener('mouseleave', () => frame.style.transform = 'perspective(1000px) rotateY(0) rotateX(0)');
+})();
+
+(function(){
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      obs.unobserve(entry.target);
+      const el = entry.target;
+      const target = parseFloat(el.getAttribute('data-count'));
+      const isInt = Number.isInteger(target);
+      const start = performance.now();
+      function step(now) {
+        const p = Math.min((now - start) / 1600, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        el.textContent = isInt ? Math.round(target * e) : (target * e).toFixed(1);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('[data-count]').forEach(c => observer.observe(c));
+})();
+
+function bindInteractions() {
+  document.querySelectorAll('.magnetic').forEach(btn => {
+    if (btn._magnetic) return; btn._magnetic = true;
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2;
+      btn.style.transform = 'translate(' + (x * 0.25) + 'px,' + (y * 0.35) + 'px)';
+    });
+    btn.addEventListener('mouseleave', () => btn.style.transform = 'translate(0, 0)');
+  });
+
+  document.querySelectorAll('.btn, .nav-cta').forEach(btn => {
+    if (btn._ripple) return; btn._ripple = true;
+    btn.addEventListener('click', (e) => {
+      const r = btn.getBoundingClientRect();
+      const rip = document.createElement('span'); rip.className = 'ripple';
+      const size = Math.max(r.width, r.height);
+      rip.style.width = rip.style.height = size + 'px';
+      rip.style.left = (e.clientX - r.left - size / 2) + 'px';
+      rip.style.top = (e.clientY - r.top - size / 2) + 'px';
+      btn.appendChild(rip); setTimeout(() => rip.remove(), 600);
+    });
+  });
+
+  const picker = document.getElementById('picker');
+  if (picker && !picker._bound) {
+    picker._bound = true;
+    const empty = document.getElementById('demo-empty');
+    const loading = document.getElementById('demo-loading');
+    const track = document.getElementById('demo-track');
+    const tTitle = document.getElementById('track-title');
+    const tMeta = document.getElementById('track-meta');
+
+    function burst(x, y) {
+      for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div'); p.className = 'sparkle';
+        p.style.left = x + 'px'; p.style.top = y + 'px';
+        const a = (i / 12) * Math.PI * 2, d = 40 + Math.random() * 60;
+        p.style.setProperty('--x', Math.cos(a) * d + 'px');
+        p.style.setProperty('--y', Math.sin(a) * d + 'px');
+        document.body.appendChild(p); setTimeout(() => p.remove(), 800);
+      }
+    }
+    picker.addEventListener('click', (e) => {
+      const b = e.target.closest('.demo-chip'); if (!b) return;
+      burst(e.clientX, e.clientY);
+      const id = b.getAttribute('data-mood');
+      const mood = I18N[currentLang].moods.find(m => m.id === id);
+      picker.querySelectorAll('.demo-chip').forEach(c => c.classList.remove('active'));
+      b.classList.add('active');
+      empty.style.display = 'none'; track.classList.remove('on'); loading.classList.add('on');
+      setTimeout(() => {
+        loading.classList.remove('on');
+        tTitle.textContent = mood.track.title;
+        tMeta.textContent = mood.track.meta;
+        track.classList.add('on');
+      }, 1800);
+    });
+  }
+}
+
+renderAll();
+bindInteractions();
+</script>
+</body>
+</html>
