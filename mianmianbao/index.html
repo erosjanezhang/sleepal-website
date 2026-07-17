@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0A192F">
 <title>眠眠宝 Sleepal · AI 睡眠伴侣</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -284,11 +284,23 @@ body[data-lang="en"] .feature-title { font-family: var(--font-serif); font-weigh
   .voices-grid { grid-template-columns: 1fr; gap: 32px; }
 }
 @media (max-width: 768px) {
+  :root { --gutter: 18px; }
   body { cursor: auto; } .cursor-dot, .cursor-glow { display: none; }
+  .blobs { opacity: 0.55; }
+  .blob { animation: none; filter: blur(60px); }
+  .nav { padding: max(12px, env(safe-area-inset-top)) 0 12px; }
+  .nav.scrolled { padding: max(10px, env(safe-area-inset-top)) 0 10px; }
+  .nav-inner { gap: 10px; }
+  .nav-brand { gap: 0; }
+  .nav-brand-cn { font-size: 18px; white-space: nowrap; }
+  .nav-brand-en { display: none; }
   .nav-items { display: none; }
+  .nav-right { gap: 8px; }
   .nav-cta { padding: 8px 16px; font-size: 12px; }
   .lang-toggle button { padding: 5px 10px; font-size: 10px; }
-  .hero { min-height: 560px; }
+  .hero { height: 100svh; min-height: 560px; }
+  .hero-video { display: none; }
+  .hero { background: linear-gradient(180deg, rgba(10,25,47,.12), rgba(10,25,47,.88)), url("hero-poster.jpg") center / cover no-repeat; }
   .hero-title { font-size: clamp(36px, 8vw, 52px); }
   .hero-eyebrow { font-size: 10px; padding: 6px 14px; margin-bottom: 28px; }
   .hero-subtitle { font-size: 16px; margin-bottom: 40px; }
@@ -312,6 +324,13 @@ body[data-lang="en"] .feature-title { font-family: var(--font-serif); font-weigh
   .voice-card { padding: 32px 24px; }
   .footer { flex-direction: column; align-items: center; text-align: center; }
   .footer-slogan { flex: none; }
+}
+@media (max-width: 390px) {
+  .nav-cta { display: none; }
+  .hero-title { font-size: 36px; }
+  .hero-cta-row { align-items: stretch; }
+  .hero-cta-row .btn { justify-content: center; width: 100%; }
+  .stats { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -362,7 +381,7 @@ body[data-lang="en"] .feature-title { font-family: var(--font-serif); font-weigh
 </nav>
 
 <section class="hero" id="top">
-  <video class="hero-video" autoplay muted loop playsinline poster="hero-poster.jpg" preload="metadata"><source src="hero-video.mp4" type="video/mp4"></video>
+  <video class="hero-video" autoplay muted loop playsinline poster="hero-poster.jpg" preload="none" aria-hidden="true"><source data-src="hero-video.mp4" type="video/mp4"></video>
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-eyebrow reveal" data-i18n="hero_eyebrow">AI 睡眠伴侣</div>
@@ -739,6 +758,7 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.15, rootMargin: '-30px' });
 
 (function(){
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
   const dot = document.getElementById('cursor-dot');
   const glow = document.getElementById('cursor-glow');
   let mX = 0, mY = 0, gX = 0, gY = 0;
@@ -762,6 +782,16 @@ const revealObserver = new IntersectionObserver((entries) => {
       dot.classList.remove('hover'); glow.classList.remove('hover');
     }
   });
+})();
+
+(function(){
+  if (!window.matchMedia('(min-width: 769px)').matches) return;
+  const video = document.querySelector('.hero-video');
+  const source = video && video.querySelector('source[data-src]');
+  if (!video || !source) return;
+  source.src = source.dataset.src;
+  video.load();
+  video.play().catch(() => {});
 })();
 
 (function(){

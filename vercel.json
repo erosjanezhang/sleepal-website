@@ -1,0 +1,25 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/mianmianbao/",
+      "permanent": false
+    },
+    {
+      "source": "/mianmianbao",
+      "destination": "/mianmianbao/",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/mianmianbao/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
